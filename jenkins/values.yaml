@@ -1,0 +1,9 @@
+controller:
+  admin:
+    existingSecret: jenkins-admin-creds
+  serviceType: NodePort
+  nodePort: 32000
+
+persistence:
+  storageClass: local-path
+  size: 5Gi
