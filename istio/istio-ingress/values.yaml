@@ -88,8 +88,7 @@ _internal_defaults_do_not_set:
 
       ### Advanced options ############
       env: {}
-      nodeSelector:
-        kubernetes.io/hostname: k8s-node1
+      nodeSelector: {}
 
       tolerations: []
 
