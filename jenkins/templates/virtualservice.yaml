@@ -12,6 +12,8 @@ spec:
     - match:
         - uri:
             prefix: {{ .Values.global.jenkinsUriPrefix | quote }}
+      rewrite:
+        uri: /jenkins
       route:
         - destination:
             host: jenkins.jenkins.svc.cluster.local
