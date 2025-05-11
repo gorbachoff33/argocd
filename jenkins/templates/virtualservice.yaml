@@ -11,7 +11,7 @@ spec:
   http:
     - match:
         - uri:
-            prefix: {{ .Values.controller.jenkinsUriPrefix | quote }}
+            prefix: {{ .Values.global.jenkinsUriPrefix | quote }}
       rewrite:
         uri: /
       route:
