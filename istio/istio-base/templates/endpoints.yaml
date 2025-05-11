@@ -11,7 +11,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 subsets:
 - addresses:
-  - ip: {{ .Values.global.remotePilotAddress }}
+  - ip: {{- if and (hasKey .Values.global "remotePilotAddress") (kindIs "string" .Values.global.remotePilotAddress) (regexMatch "^([0-9]*\\.){3}[0-9]*$" .Values.global.remotePilotAddress) }}
   ports:
   - port: 15012
     name: tcp-istiod
