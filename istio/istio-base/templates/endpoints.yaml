@@ -1,4 +1,4 @@
-{{- if regexMatch "^([0-9]*\\.){3}[0-9]*$" .Values.global.remotePilotAddress }}
+{{- if and (hasKey .Values.global "remotePilotAddress") (kindIs "string" .Values.global.remotePilotAddress) (regexMatch "^([0-9]*\\.){3}[0-9]*$" .Values.global.remotePilotAddress) }}
 # if the remotePilotAddress is an IP addr
 apiVersion: v1
 kind: Endpoints
@@ -11,7 +11,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 subsets:
 - addresses:
-  - ip: {{- if and (hasKey .Values.global "remotePilotAddress") (kindIs "string" .Values.global.remotePilotAddress) (regexMatch "^([0-9]*\\.){3}[0-9]*$" .Values.global.remotePilotAddress) }}
+  - ip: {{ .Values.global.remotePilotAddress }}
   ports:
   - port: 15012
     name: tcp-istiod
