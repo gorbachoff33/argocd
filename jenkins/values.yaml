@@ -7,3 +7,5 @@ controller:
 persistence:
   storageClass: local-path
   size: 5Gi
+serviceAccount:
+  create: true
