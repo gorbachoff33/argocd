@@ -47,8 +47,8 @@ _internal_defaults_do_not_set:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: 200m
+          memory: 256Mi
 
       loadBalancerIP: ""
       loadBalancerSourceRanges: []
