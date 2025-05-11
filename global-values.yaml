@@ -1,2 +1,4 @@
 global:
   hostname: 8761.online-vds.ru
+  jenkinsUriPrefix: /jenkins
+  argocdUriPrefix: /argocd
