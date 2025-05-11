@@ -633,7 +633,8 @@ controller:
 
   # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   # -- Node labels for pod assignment
-  nodeSelector: {}
+  nodeSelector:
+    kubernetes.io/hostname: k8s-node1
 
   # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
   # -- Toleration labels for pod assignment
