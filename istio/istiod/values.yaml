@@ -1,127 +1,148 @@
-defaults:
-  #.Values.pilot for discovery and mesh wide config
+# "_internal_defaults_do_not_set" — это обходной путь для ограничений Helm.
+# Пользователям НЕ следует явно задавать "._internal_defaults_do_not_set", вместо этого следует напрямую указывать нужные поля.
+# Например, вместо `--set _internal_defaults_do_not_set.foo=bar` просто используйте `--set foo=bar`.
+_internal_defaults_do_not_set:
+  autoscaleEnabled: true
+  autoscaleMin: 1
+  autoscaleMax: 5
+  autoscaleBehavior: {}
+  replicaCount: 1
+  rollingMaxSurge: 100%
+  rollingMaxUnavailable: 25%
 
-  ## Discovery Settings
-  pilot:
-    autoscaleEnabled: true
-    autoscaleMin: 1
-    autoscaleMax: 5
-    autoscaleBehavior: {}
-    replicaCount: 1
-    rollingMaxSurge: 100%
-    rollingMaxUnavailable: 25%
+  hub: ""
+  tag: ""
+  variant: ""
 
-    hub: ""
-    tag: ""
-    variant: ""
+  # Может быть полным hub/image:tag
+  image: pilot
+  traceSampling: 1.0
 
-    # Can be a full hub/image:tag
-    image: pilot
-    traceSampling: 1.0
+  # Ресурсы для минимальной установки pilot
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2048Mi
 
-    # Resources for a small pilot install
-    resources:
-      requests:
-        cpu: 500m
-        memory: 2048Mi
+  # Установите `type: RuntimeDefault`, чтобы использовать профиль безопасности по умолчанию, если он доступен
+  seccompProfile: {}
 
-    # Set to `type: RuntimeDefault` to use the default profile if available.
-    seccompProfile: {}
+  # Использовать ли существующую установку CNI
+  cni:
+    enabled: false
+    provider: default
 
-    # Additional container arguments
-    extraContainerArgs: []
+  # Дополнительные аргументы для контейнера
+  extraContainerArgs: []
 
-    env: {}
+  env: {}
 
-    affinity: {}
+  envVarFrom: []
 
-    tolerations: []
+  # Настройки, связанные с контроллером снятия taint
+  # Этот контроллер удалит метку `cni.istio.io/not-ready` с узлов, когда pod istio-cni станет готов
+  # Следует отметить, что администратор кластера сам отвечает за установку этого taint при добавлении новых узлов; контроллер его не устанавливает
+  taint:
+    # Управляет активацией контроллера снятия taint
+    enabled: false
+    # Namespace, который будет отслеживать контроллер снятия taint для pod'ов istio-cni. Необходим только если istio-cni работает в другом namespace, чем istiod
+    namespace: ""
 
-    cpu:
-      targetAverageUtilization: 80
-    memory: {}
-      # targetAverageUtilization: 80
+  affinity: {}
 
-    # Additional volumeMounts to the istiod container
-    volumeMounts: []
+  tolerations: []
 
-    # Additional volumes to the istiod pod
-    volumes: []
+  cpu:
+    targetAverageUtilization: 80
+  memory: {}
+    # targetAverageUtilization: 80
 
-    nodeSelector: {}
-    podAnnotations: {}
-    serviceAnnotations: {}
+  # Дополнительные volumeMount'ы в контейнер istiod
+  volumeMounts: []
 
-    topologySpreadConstraints: []
+  # Дополнительные volumes в pod istiod
+  volumes: []
 
-    # You can use jwksResolverExtraRootCA to provide a root certificate
-    # in PEM format. This will then be trusted by pilot when resolving
-    # JWKS URIs.
-    jwksResolverExtraRootCA: ""
+  # Добавить initContainers в pod istiod
+  initContainers: []
 
-    # This is used to set the source of configuration for
-    # the associated address in configSource, if nothing is specified
-    # the default MCP is assumed.
-    configSource:
-      subscribedResources: []
+  nodeSelector: {}
+  podAnnotations: {}
+  serviceAnnotations: {}
+  serviceAccountAnnotations: {}
+  sidecarInjectorWebhookAnnotations: {}
 
-    plugins: []
+  topologySpreadConstraints: []
 
-    # The following is used to limit how long a sidecar can be connected
-    # to a pilot. It balances out load across pilot instances at the cost of
-    # increasing system churn.
-    keepaliveMaxServerConnectionAge: 30m
+  # Можно использовать jwksResolverExtraRootCA, чтобы задать root-сертификат
+  # в формате PEM. Он будет использоваться pilot при разрешении JWKS URI.
+  jwksResolverExtraRootCA: ""
 
-    # Additional labels to apply to the deployment.
-    deploymentLabels: {}
+  # Настройка времени жизни соединения sidecar с pilot.
+  # Помогает распределить нагрузку между экземплярами pilot за счёт ротации соединений.
+  keepaliveMaxServerConnectionAge: 30m
 
-    ## Mesh config settings
+  # Дополнительные метки для deployment istiod
+  deploymentLabels: {}
 
-    # Install the mesh config map, generated from values.yaml.
-    # If false, pilot wil use default values (by default) or user-supplied values.
-    configMap: true
+  ## Настройки конфигурации mesh
 
-    # Additional labels to apply on the pod level for monitoring and logging configuration.
-    podLabels: {}
+  # Установить ConfigMap с meshConfig, сгенерированным из values.yaml.
+  # Если false — pilot использует значения по умолчанию или явно заданные пользователем.
+  configMap: true
 
-    # Setup how istiod Service is configured. See https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
-    ipFamilyPolicy: ""
-    ipFamilies: []
+  # Дополнительные метки на pod, например, для настройки мониторинга и логирования
+  podLabels: {}
+
+  # Настройка сервиса istiod. Подробнее: https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
+  ipFamilyPolicy: ""
+  ipFamilies: []
+
+  # Только для Ambient режима.
+  # Укажите это значение, если вы устанавливаете ztunnel в другом namespace, отличном от `istiod`.
+  # Если задано, `istiod` будет разрешать подключения от доверенных ztunnel из указанного namespace.
+  # Если не указано, `istiod` предполагает, что ztunnel находится в том же namespace.
+  trustedZtunnelNamespace: ""
+  # Укажите это значение, если имя ztunnel отличается от значения по умолчанию.
+  trustedZtunnelName: ""
 
   sidecarInjectorWebhook:
-    # You can use the field called alwaysInjectSelector and neverInjectSelector which will always inject the sidecar or
-    # always skip the injection on pods that match that label selector, regardless of the global policy.
-    # See https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#more-control-adding-exceptions
+    # alwaysInjectSelector и neverInjectSelector позволяют явно управлять injection’ом sidecar,
+    # независимо от глобальной политики.
+    # Подробнее: https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#more-control-adding-exceptions
     neverInjectSelector: []
     alwaysInjectSelector: []
 
-    # injectedAnnotations are additional annotations that will be added to the pod spec after injection
-    # This is primarily to support PSP annotations. For example, if you defined a PSP with the annotations:
+    # injectedAnnotations — дополнительные аннотации, добавляемые к pod после injection.
+    # Это в основном используется для поддержки PSP.
+    # Пример PSP с аннотациями:
     #
     # annotations:
     #   apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
     #   apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
     #
-    # The PSP controller would add corresponding annotations to the pod spec for each container. However, this happens before
-    # the inject adds additional containers, so we must specify them explicitly here. With the above example, we could specify:
+    # PSP-контроллер добавляет эти аннотации к pod до injection.
+    # Чтобы новые контейнеры также получили эти аннотации, их нужно указать явно:
     # injectedAnnotations:
     #   container.apparmor.security.beta.kubernetes.io/istio-init: runtime/default
     #   container.apparmor.security.beta.kubernetes.io/istio-proxy: runtime/default
     injectedAnnotations: {}
 
-    # This enables injection of sidecar in all namespaces,
-    # with the exception of namespaces with "istio-injection:disabled" annotation
-    # Only one environment should have this enabled.
+    # Включает injection во всех namespace,
+    # за исключением тех, где явно указано "istio-injection:disabled"
+    # Только одно окружение должно иметь эту настройку включенной.
     enableNamespacesByDefault: false
 
-    # Mutations that occur after the sidecar injector are not handled by default, as the Istio sidecar injector is only run
-    # once. For example, an OPA sidecar injected after the Istio sidecar will not have it's liveness/readiness probes rewritten.
-    # Setting this to `IfNeeded` will result in the sidecar injector being run again if additional mutations occur.
+    # Изменения, происходящие после работы sidecar injector’а, по умолчанию не обрабатываются,
+    # потому что injector запускается только один раз.
+    # Например, если после Istio добавится другой sidecar (например, OPA), его readiness/liveness пробы не будут переписаны.
+    # Установка `IfNeeded` позволит повторно запустить injector при наличии новых изменений.
     reinvocationPolicy: Never
 
     rewriteAppHTTPProbe: true
 
-    # Templates defines a set of custom injection templates that can be used. For example, defining:
+    # templates определяет набор пользовательских шаблонов для sidecar injection.
+    # Например:
     #
     # templates:
     #   hello: |
@@ -129,16 +150,16 @@ defaults:
     #       labels:
     #         hello: world
     #
-    # Then starting a pod with the `inject.istio.io/templates: hello` annotation, will result in the pod
-    # being injected with the hello=world labels.
-    # This is intended for advanced configuration only; most users should use the built in template
+    # Затем, если pod будет создан с аннотацией `inject.istio.io/templates: hello`,
+    # он будет инжектирован с меткой hello=world.
+    # Это предназначено для продвинутой настройки, большинство пользователей должны использовать стандартный шаблон.
     templates: {}
 
-    # Default templates specifies a set of default templates that are used in sidecar injection.
-    # By default, a template `sidecar` is always provided, which contains the template of default sidecar.
-    # To inject other additional templates, define it using the `templates` option, and add it to
-    # the default templates list.
-    # For example:
+    # defaultTemplates определяет список шаблонов, которые будут использоваться по умолчанию для injection.
+    # По умолчанию всегда доступен шаблон `sidecar`, содержащий стандартный шаблон sidecar.
+    # Чтобы использовать дополнительные шаблоны, нужно определить их через параметр `templates`,
+    # и затем добавить в список defaultTemplates.
+    # Пример:
     #
     # templates:
     #   hello: |
@@ -148,61 +169,75 @@ defaults:
     #
     # defaultTemplates: ["sidecar", "hello"]
     defaultTemplates: []
+
   istiodRemote:
-    # Sidecar injector mutating webhook configuration clientConfig.url value.
-    # For example: https://$remotePilotAddress:15017/inject
-    # The host should not refer to a service running in the cluster; use a service reference by specifying
-    # the clientConfig.service field instead.
+    # Если установлено в true, указывает, что этот кластер использует удалённую установку istiod,
+    # и сам istiod в этом кластере устанавливаться НЕ будет — только вспомогательные ресурсы для подключения к удалённому экземпляру.
+    enabled: false
+
+    # URL для clientConfig.url в конфигурации webhook’а для sidecar injector'а.
+    # Например: https://$remotePilotAddress:15017/inject
+    # Не используйте адреса сервисов в текущем кластере — вместо этого используйте clientConfig.service.
     injectionURL: ""
 
-    # Sidecar injector mutating webhook configuration path value for the clientConfig.service field.
-    # Override to pass env variables, for example: /inject/cluster/remote/net/network2
+    # Путь в clientConfig.service, передаваемый для настройки webhook’а.
+    # Может быть переопределён для передачи переменных окружения, например: /inject/cluster/remote/net/network2
     injectionPath: "/inject"
+
+    # CA-бандл, используемый для валидации подключения к webhook’у injection
+    injectionCABundle: ""
+
   telemetry:
     enabled: true
     v2:
-      # For Null VM case now.
-      # This also enables metadata exchange.
+      # Используется в случае Null VM.
+      # Также включает обмен метаданными (metadata exchange).
       enabled: true
-      # Indicate if prometheus stats filter is enabled or not
+
+      # Указывает, включён ли фильтр Prometheus для метрик
       prometheus:
         enabled: true
-      # stackdriver filter settings.
+
+      # Настройки фильтра Stackdriver
       stackdriver:
         enabled: false
-  # Revision is set as 'version' label and part of the resource names when installing multiple control planes.
+
+  # revision указывается как метка 'version' и как часть имён ресурсов при установке нескольких control plane'ов
   revision: ""
 
-  # Revision tags are aliases to Istio control plane revisions
+  # revisionTags — это псевдонимы (алиасы) для версий control plane в Istio
   revisionTags: []
 
-  # For Helm compatibility.
+  # Для совместимости с Helm
   ownerName: ""
 
-  # meshConfig defines runtime configuration of components, including Istiod and istio-agent behavior
-  # See https://istio.io/docs/reference/config/istio.mesh.v1alpha1/ for all available options
+  # meshConfig определяет поведение компонентов во время исполнения, включая istiod и istio-agent
+  # Полный список доступен на: https://istio.io/docs/reference/config/istio.mesh.v1alpha1/
   meshConfig:
     enablePrometheusMerge: true
 
+  experimental:
+    # Включить экспериментальную стабильную политику валидации
+    stableValidationPolicy: false
+
   global:
-    # Used to locate istiod.
+    # Используется для определения расположения istiod
     istioNamespace: istio-system
-    # List of cert-signers to allow "approve" action in the istio cluster role
+
+    # Список разрешённых подписантов сертификатов, которым разрешено выполнять действие "approve"
     #
     # certSigners:
     #   - clusterissuers.cert-manager.io/istio-ca
     certSigners: []
-    # enable pod disruption budget for the control plane, which is used to
-    # ensure Istio control plane components are gradually upgraded or recovered.
+
+    # Включить pod disruption budget для компонентов control plane,
+    # что обеспечивает безопасное обновление или восстановление Istio
     defaultPodDisruptionBudget:
       enabled: true
-      # The values aren't mutable due to a current PodDisruptionBudget limitation
-      # minAvailable: 1
+      # Значения (например, minAvailable) не могут быть изменены из-за ограничений в Kubernetes для PodDisruptionBudget
 
-    # A minimal set of requested resources to applied to all deployments so that
-    # Horizontal Pod Autoscaler will be able to function (if set).
-    # Each component can overwrite these default values by adding its own resources
-    # block in the relevant section below and setting the desired resources values.
+    # Минимальные ресурсы по умолчанию, чтобы работал Horizontal Pod Autoscaler (если настроен)
+    # Каждый компонент может переопределить эти значения в своей секции.
     defaultResources:
       requests:
         cpu: 10m
@@ -211,136 +246,121 @@ defaults:
       #   cpu: 100m
       #   memory: 128Mi
 
-    # Default hub for Istio images.
-    # Releases are published to docker hub under 'istio' project.
-    # Dev builds from prow are on gcr.io
-    hub: gcr.io/istio-testing
-    # Default tag for Istio images.
-    tag: latest
-    # Variant of the image to use.
-    # Currently supported are: [debug, distroless]
+    # Контейнерный registry по умолчанию для образов Istio
+    # Релизы публикуются на docker hub в проекте 'istio'
+    # Сборки из CI — на gcr.io
+    hub: docker.io/istio
+
+    # Тег по умолчанию для образов Istio
+    tag: 1.26.0
+
+    # Вариант образа, например debug или distroless
     variant: ""
 
-    # Specify image pull policy if default behavior isn't desired.
-    # Default behavior: latest images will be Always else IfNotPresent.
+    # Политика pull’а образов. По умолчанию: Always для latest, иначе IfNotPresent
     imagePullPolicy: ""
 
-    # ImagePullSecrets for all ServiceAccount, list of secrets in the same namespace
-    # to use for pulling any images in pods that reference this ServiceAccount.
-    # For components that don't use ServiceAccounts (i.e. grafana, servicegraph, tracing)
-    # ImagePullSecrets will be added to the corresponding Deployment(StatefulSet) objects.
-    # Must be set for any cluster configured with private docker registry.
+    # Секреты для pull’а образов из приватного реестра, применяемые ко всем ServiceAccount
+    # Для компонентов без ServiceAccount (например, grafana, servicegraph, tracing)
+    # эти секреты будут добавлены напрямую в Deployment или StatefulSet
     imagePullSecrets: []
     # - private-registry-key
 
-    # Enabled by default in master for maximising testing.
+    # Включено по умолчанию в master для расширенного тестирования
     istiod:
       enableAnalysis: false
 
-    # To output all istio components logs in json format by adding --log_as_json argument to each container argument
+    # Включает вывод логов всех компонентов Istio в формате JSON (через аргумент --log_as_json)
     logAsJson: false
 
-    # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
-    # The control plane has different scopes depending on component, but can configure default log level across all components
-    # If empty, default scope and level will be used as configured in code
+    # Минимальный уровень логирования по каждому скоупу, в формате <scope>:<level>,<scope>:<level>
+    # Если не указано — используются значения по умолчанию, заданные в коде
     logging:
       level: "default:info"
 
+    # Пропустить создание ConfigMap для sidecar injector’а
     omitSidecarInjectorConfigMap: false
 
-    # Whether to restrict the applications namespace the controller manages;
-    # If not set, controller watches all namespaces
-    oneNamespace: false
-
-    # Configure whether Operator manages webhook configurations. The current behavior
-    # of Istiod is to manage its own webhook configurations.
-    # When this option is set as true, Istio Operator, instead of webhooks, manages the
-    # webhook configurations. When this option is set as false, webhooks manage their
-    # own webhook configurations.
+    # Управляет ли Istio Operator конфигурациями webhook’ов
+    # Если true — Operator берёт управление на себя, если false — webhook’и управляют собой сами
     operatorManageWebhooks: false
 
-    # Custom DNS config for the pod to resolve names of services in other
-    # clusters. Use this to add additional search domains, and other settings.
-    # see
-    # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#dns-config
-    # This does not apply to gateway pods as they typically need a different
-    # set of DNS settings than the normal application pods (e.g., in
-    # multicluster scenarios).
-    # NOTE: If using templates, follow the pattern in the commented example below.
+    # Кастомная DNS-конфигурация pod'ов для разрешения имён сервисов в других кластерах
+    # Используется для добавления search-доменов и других настроек
+    # Подробнее: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#dns-config
+    # Примечание: не применяется к gateway-подам, которым могут потребоваться иные настройки
+    # NOTE: если используете шаблоны, используйте следующий шаблон:
     #podDNSSearchNamespaces:
     #- global
     #- "{{ valueOrDefault .DeploymentMeta.Namespace \"default\" }}.global"
 
-    # Kubernetes >=v1.11.0 will create two PriorityClass, including system-cluster-critical and
-    # system-node-critical, it is better to configure this in order to make sure your Istio pods
-    # will not be killed because of low priority class.
-    # Refer to https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
-    # for more detail.
+    # Kubernetes >=v1.11.0 создаёт два PriorityClass: system-cluster-critical и system-node-critical
+    # Лучше явно задать priorityClassName, чтобы гарантировать, что pod'ы Istio не будут завершены из-за низкого приоритета
+    # Подробнее: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
     proxy:
       image: proxyv2
 
-      # This controls the 'policy' in the sidecar injector.
+      # Управляет политикой в sidecar injector’е.
       autoInject: enabled
 
-      # CAUTION: It is important to ensure that all Istio helm charts specify the same clusterDomain value
-      # cluster domain. Default value is "cluster.local".
+      # ВНИМАНИЕ: Важно, чтобы во всех Helm-чартах Istio было задано одинаковое значение clusterDomain
+      # Домен кластера. Значение по умолчанию: "cluster.local".
       clusterDomain: "cluster.local"
 
-      # Per Component log level for proxy, applies to gateways and sidecars. If a component level is
-      # not set, then the global "logLevel" will be used.
+      # Уровень логирования для proxy по компонентам. Применяется к gateway и sidecar.
+      # Если уровень не задан, используется глобальный logLevel.
       componentLogLevel: "misc:error"
 
-      # If set, newly injected sidecars will have core dumps enabled.
-      enableCoreDump: false
-
-      # istio ingress capture allowlist
-      # examples:
-      #     Redirect only selected ports:            --includeInboundPorts="80,8080"
+      # Список разрешённых входящих портов (ingress)
+      # Примеры:
+      #     Перенаправлять только выбранные порты: --includeInboundPorts="80,8080"
       excludeInboundPorts: ""
       includeInboundPorts: "*"
 
-      # istio egress capture allowlist
-      # https://istio.io/docs/tasks/traffic-management/egress.html#calling-external-services-directly
-      # example: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
-      # would only capture egress traffic on those two IP Ranges, all other outbound traffic would
-      # be allowed by the sidecar
+      # Список разрешённых исходящих IP (egress)
+      # Подробнее: https://istio.io/docs/tasks/traffic-management/egress.html#calling-external-services-directly
+      # Пример: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
+      # Это ограничит захват трафика только на указанные подсети; остальной трафик будет пропущен
       includeIPRanges: "*"
       excludeIPRanges: ""
       includeOutboundPorts: ""
       excludeOutboundPorts: ""
 
-      # Log level for proxy, applies to gateways and sidecars.
-      # Expected values are: trace|debug|info|warning|error|critical|off
+      # Уровень логов для proxy (gateway и sidecar)
+      # Допустимые значения: trace|debug|info|warning|error|critical|off
       logLevel: warning
 
-      #If set to true, istio-proxy container will have privileged securityContext
+      # Путь к лог-файлу событий отклонения (outlier detection)
+      # Пример: /dev/stdout
+      outlierLogPath: ""
+
+      # Если true — контейнер istio-proxy будет запускаться с привилегиями (privileged)
       privileged: false
 
-      # The number of successive failed probes before indicating readiness failure.
+      # Количество неудачных проб до того, как под будет считаться неготовым
       readinessFailureThreshold: 4
 
-      # The initial delay for readiness probes in seconds.
+      # Задержка перед первой readiness-пробой (в секундах)
       readinessInitialDelaySeconds: 0
 
-      # The period between readiness probes.
+      # Периодичность readiness-проб (в секундах)
       readinessPeriodSeconds: 15
 
-      # Enables or disables a startup probe.
-      # For optimal startup times, changing this should be tied to the readiness probe values.
+      # Включает или отключает startup-пробу
+      # Для быстрой и стабильной инициализации рекомендуется синхронизировать с readiness-пробами
       #
-      # If the probe is enabled, it is recommended to have delay=0s,period=15s,failureThreshold=4.
-      # This ensures the pod is marked ready immediately after the startup probe passes (which has a 1s poll interval),
-      # and doesn't spam the readiness endpoint too much
+      # Рекомендуемые значения если probe включена:
+      # delay=0s, period=15s, failureThreshold=4 — под будет готов сразу после прохождения стартап-пробы
       #
-      # If the probe is disabled, it is recommended to have delay=1s,period=2s,failureThreshold=30.
-      # This ensures the startup is reasonable fast (polling every 2s). 1s delay is used since the startup is not often ready instantly.
+      # Если отключена:
+      # delay=1s, period=2s, failureThreshold=30 — ускоренная инициализация, но с безопасной проверкой
       startupProbe:
         enabled: true
-        failureThreshold: 600 # 10 minutes
+        failureThreshold: 600 # 10 минут
 
-      # Resources for the sidecar.
+      # Ресурсы для контейнера sidecar (istio-proxy)
       resources:
         requests:
           cpu: 100m
@@ -349,78 +369,63 @@ defaults:
           cpu: 2000m
           memory: 1024Mi
 
-      # Default port for Pilot agent health checks. A value of 0 will disable health checking.
+      # Порт, используемый для health check'ов от Pilot. Значение 0 отключает проверку.
       statusPort: 15020
 
-      # Specify which tracer to use. One of: zipkin, lightstep, datadog, stackdriver.
-      # If using stackdriver tracer outside GCP, set env GOOGLE_APPLICATION_CREDENTIALS to the GCP credential file.
-      tracer: "zipkin"
+      # Трейсер, который будет использоваться. Возможные значения: zipkin, lightstep, datadog, stackdriver, none
+      # Если используется stackdriver вне GCP — установите переменную окружения GOOGLE_APPLICATION_CREDENTIALS
+      tracer: "none"
 
     proxy_init:
-      # Base name for the proxy_init container, used to configure iptables.
+      # Имя образа контейнера proxy_init, который настраивает iptables
       image: proxyv2
 
-    # configure remote pilot and istiod service and endpoint
+      # Принудительно применяет правила iptables без проверки идемпотентности,
+      # что может вызвать ошибки. Использовать только в крайнем случае. Будет удалено в будущих релизах.
+      forceApplyIptables: false
+
+    # Указание адреса удалённого сервиса Pilot или istiod
     remotePilotAddress: ""
 
     ##############################################################################################
-    # The following values are found in other charts. To effectively modify these values, make   #
-    # make sure they are consistent across your Istio helm charts                                #
+    # Следующие параметры встречаются и в других Helm-чартах. Убедитесь, что они согласованы     #
+    # между всеми используемыми чартапми Istio                                                   #
     ##############################################################################################
 
-    # The customized CA address to retrieve certificates for the pods in the cluster.
-    # CSR clients such as the Istio Agent and ingress gateways can use this to specify the CA endpoint.
-    # If not set explicitly, default to the Istio discovery address.
+    # Кастомный адрес CA для получения сертификатов подами
+    # CSR-клиенты, такие как Istio Agent или ingress gateway, будут использовать его как endpoint
+    # Если не задан — используется адрес Istio discovery по умолчанию
     caAddress: ""
 
-    # Configure a remote cluster data plane controlled by an external istiod.
-    # When set to true, istiod is not deployed locally and only a subset of the other
-    # discovery charts are enabled.
+    # Включить поддержку управления удалёнными кластерами
     externalIstiod: false
 
-    # Configure a remote cluster as the config cluster for an external istiod.
+    # Настроить текущий кластер как config-кластер для удалённого istiod
     configCluster: false
 
-    # Configure the policy for validating JWT.
-    # Currently, two options are supported: "third-party-jwt" and "first-party-jwt".
-    jwtPolicy: "third-party-jwt"
+    # Включить webhook валидации для ресурсов Istio
+    configValidation: true
 
-    # Mesh ID means Mesh Identifier. It should be unique within the scope where
-    # meshes will interact with each other, but it is not required to be
-    # globally/universally unique. For example, if any of the following are true,
-    # then two meshes must have different Mesh IDs:
-    # - Meshes will have their telemetry aggregated in one place
-    # - Meshes will be federated together
-    # - Policy will be written referencing one mesh from the other
+    # meshID — идентификатор mesh'а. Он должен быть уникальным в пределах взаимодействующих сетей,
+    # но не обязан быть глобально уникальным.
     #
-    # If an administrator expects that any of these conditions may become true in
-    # the future, they should ensure their meshes have different Mesh IDs
-    # assigned.
+    # Разные meshID должны быть, если:
+    # - Метрики будут агрегироваться в одном месте
+    # - Mesh-сети будут объединены (federated)
+    # - Политики будут ссылаться из одной сети в другую
     #
-    # Within a multicluster mesh, each cluster must be (manually or auto)
-    # configured to have the same Mesh ID value. If an existing cluster 'joins' a
-    # multicluster mesh, it will need to be migrated to the new mesh ID. Details
-    # of migration TBD, and it may be a disruptive operation to change the Mesh
-    # ID post-install.
+    # Если администратор ожидает, что что-то из этого может произойти — meshID должны отличаться
     #
-    # If the mesh admin does not specify a value, Istio will use the value of the
-    # mesh's Trust Domain. The best practice is to select a proper Trust Domain
-    # value.
+    # В multicluster-сети все кластеры должны иметь одинаковый meshID.
+    # При присоединении нового кластера его нужно будет мигрировать на текущий meshID.
+    #
+    # Если значение не задано — используется trustDomain.
+    # Рекомендуется всегда задавать правильный trustDomain явно.
     meshID: ""
 
-    # Configure the mesh networks to be used by the Split Horizon EDS.
+    # Настройка mesh-сетей для Split Horizon EDS
     #
-    # The following example defines two networks with different endpoints association methods.
-    # For `network1` all endpoints that their IP belongs to the provided CIDR range will be
-    # mapped to network1. The gateway for this network example is specified by its public IP
-    # address and port.
-    # The second network, `network2`, in this example is defined differently with all endpoints
-    # retrieved through the specified Multi-Cluster registry being mapped to network2. The
-    # gateway is also defined differently with the name of the gateway service on the remote
-    # cluster. The public IP for the gateway will be determined from that remote service (only
-    # LoadBalancer gateway service type is currently supported, for a NodePort type gateway service,
-    # it still need to be configured manually).
-    #
+    # Пример:
     # meshNetworks:
     #   network1:
     #     endpoints:
@@ -435,66 +440,97 @@ defaults:
     #     - registryServiceName: istio-ingressgateway.istio-system.svc.cluster.local
     #       port: 443
     #
+    # network1: сопоставление через IP-диапазон
+    # network2: сопоставление через registry, gateway определяется через сервис
     meshNetworks: {}
 
-    # Use the user-specified, secret volume mounted key and certs for Pilot and workloads.
+    # Использовать указанные пользователем ключ и сертификаты,
+    # смонтированные как секретный том (secret volume) для Pilot и рабочих подов
     mountMtlsCerts: false
 
     multiCluster:
-      # Set to true to connect two kubernetes clusters via their respective
-      # ingressgateway services when pods in each cluster cannot directly
-      # talk to one another. All clusters should be using Istio mTLS and must
-      # have a shared root CA for this model to work.
+      # Установите значение true, чтобы соединить два кластера Kubernetes через их ingressgateway,
+      # если поды в этих кластерах не могут напрямую общаться между собой.
+      # Все кластеры должны использовать Istio mTLS и общую root CA, чтобы это работало.
       enabled: false
-      # Should be set to the name of the cluster this installation will run in. This is required for sidecar injection
-      # to properly label proxies
+
+      # Укажите имя кластера, в котором выполняется установка.
+      # Это необходимо для корректного назначения меток в sidecar injection.
       clusterName: ""
 
-    # Network defines the network this cluster belong to. This name
-    # corresponds to the networks in the map of mesh networks.
+    # Название сети, к которой относится данный кластер.
+    # Это имя должно совпадать с одним из ключей в разделе meshNetworks.
     network: ""
 
-    # Configure the certificate provider for control plane communication.
-    # Currently, two providers are supported: "kubernetes" and "istiod".
-    # As some platforms may not have kubernetes signing APIs,
-    # Istiod is the default
+    # Настройка провайдера сертификатов для связи control plane.
+    # Поддерживаются два варианта: "kubernetes" и "istiod".
+    # На некоторых платформах API Kubernetes для подписи сертификатов может отсутствовать,
+    # в этом случае по умолчанию используется istiod.
     pilotCertProvider: istiod
 
     sds:
-      # The JWT token for SDS and the aud field of such JWT. See RFC 7519, section 4.1.3.
-      # When a CSR is sent from Istio Agent to the CA (e.g. Istiod), this aud is to make sure the
-      # JWT is intended for the CA.
+      # JWT-токен для SDS и поле `aud` этого токена. См. RFC 7519, раздел 4.1.3.
+      # При отправке CSR от Istio Agent в CA (например, Istiod), значение `aud`
+      # проверяется, чтобы убедиться, что токен действительно предназначен для CA.
       token:
         aud: istio-ca
 
     sts:
-      # The service port used by Security Token Service (STS) server to handle token exchange requests.
-      # Setting this port to a non-zero value enables STS server.
+      # Порт сервиса STS (Security Token Service), обрабатывающего запросы на обмен токенов.
+      # Установка значения, отличного от 0, включает STS-сервер.
       servicePort: 0
 
-    # The name of the CA for workload certificates.
-    # For example, when caName=GkeWorkloadCertificate, GKE workload certificates
-    # will be used as the certificates for workloads.
-    # The default value is "" and when caName="", the CA will be configured by other
-    # mechanisms (e.g., environmental variable CA_PROVIDER).
+    # Название CA, используемого для выдачи сертификатов рабочим подам.
+    # Например, если caName=GkeWorkloadCertificate, будут использоваться сертификаты GKE workload.
+    # Значение по умолчанию — пустая строка. В этом случае CA настраивается другими средствами,
+    # например, через переменную окружения CA_PROVIDER.
     caName: ""
 
-    # whether to use autoscaling/v2 template for HPA settings
-    # for internal usage only, not to be configured by users.
-    autoscalingv2API: true
+    waypoint:
+      # Ресурсы для прокси waypoint
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: "2"
+          memory: 1Gi
+
+      # Если указано, affinity определяет правила размещения pod’ов waypoint
+      affinity: {}
+
+      # Ограничения по распределению pod’ов waypoint по топологии (например, по зонам)
+      topologySpreadConstraints: []
+
+      # Метки узлов (nodeSelector) для pod’ов waypoint
+      nodeSelector: {}
+
+      # Tolerations для pod’ов waypoint
+      tolerations: []
 
   base:
-    # For istioctl usage to disable istio config crds in base
+    # Для использования с istioctl — отключение установки CRD istio в базовом профиле
     enableIstioConfigCRDs: true
 
-    #  keep in sync with settings used when installing the Istio CNI chart
-  istio_cni:
-    enabled: false
-    chained: true
-
-  # Gateway Settings
+  # Настройки Gateway
   gateways:
-    # Define the security context for the pod.
-    # If unset, this will be automatically set to the minimum privileges required to bind to port 80 and 443.
-    # On Kubernetes 1.22+, this only requires the `net.ipv4.ip_unprivileged_port_start` sysctl.
+    # Определение securityContext для pod’а.
+    # Если не задано — автоматически будет установлено минимально необходимое для привязки к портам 80 и 443.
+    # В Kubernetes 1.22+ для этого достаточно настройки sysctl `net.ipv4.ip_unprivileged_port_start`.
     securityContext: {}
+
+    # Установите `type: RuntimeDefault`, чтобы использовать профиль безопасности по умолчанию
+    # для шаблонных gateway'ев, если он поддерживается в вашей среде контейнеров.
+    seccompProfile: {}
+
+  # gatewayClasses позволяет настроить поведение развертывания Gateway'ев по умолчанию
+  # для каждой GatewayClass. Пример:
+  #
+  # gatewayClasses:
+  #   istio:
+  #     service:
+  #       spec:
+  #         type: ClusterIP
+  #
+  # Также настройки конкретного Gateway можно задать через поле `Gateway.spec.infrastructure.parametersRef`
+  gatewayClasses: {}
