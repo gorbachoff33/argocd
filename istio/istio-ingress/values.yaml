@@ -1,21 +1,22 @@
-# "_internal_defaults_do_not_set" is a workaround for Helm limitations. Users should NOT set "._internal_defaults_do_not_set" explicitly, but rather directly set the fields internally.
-# For instance, instead of `--set _internal_defaults_do_not_set.foo=bar``, just set `--set foo=bar`.
+# "_internal_defaults_do_not_set" — это обходное решение для ограничений Helm.
+# Пользователям НЕ следует явно указывать "._internal_defaults_do_not_set", вместо этого следует задавать поля напрямую.
+# Например, вместо `--set _internal_defaults_do_not_set.foo=bar` укажите `--set foo=bar`.
 _internal_defaults_do_not_set:
-  # A-la-carte istio ingress gateway.
-  # Must be installed in a separate namespace, to minimize access to secrets.
+  # Istio ingress gateway по принципу "a-la-carte".
+  # Должен быть установлен в отдельном namespace, чтобы минимизировать доступ к секретам.
   gateways:
     istio-ingressgateway:
       name: istio-ingressgateway
-      # NOTE that these labels will get encoded implicitly into selectorLabels
-      # if this is a problem, consider using the `gateway` chart instead
+      # ВНИМАНИЕ: эти метки будут неявно закодированы в selectorLabels
+      # Если это создаёт проблемы, рассмотрите использование чарта `gateway`
       labels:
         app: istio-ingressgateway
         istio: ingressgateway
       ports:
-      ## You can add custom gateway ports in user values overrides, but it must include those ports since helm replaces.
-      # Note that AWS ELB will by default perform health checks on the first port
-      # on this list. Setting this to the health check port will ensure that health
-      # checks always work. https://github.com/istio/istio/issues/12503
+      ## Вы можете добавить пользовательские порты для шлюза в значениях пользователя, но обязательно указывайте существующие порты, так как Helm заменяет всё.
+      # Обратите внимание, что AWS ELB по умолчанию выполняет проверки доступности (health checks) на первом порту
+      # в этом списке. Установка этого порта как порта проверки обеспечит корректную работу health check.
+      # https://github.com/istio/istio/issues/12503
       - port: 15021
         targetPort: 15021
         name: status-port
@@ -24,12 +25,14 @@ _internal_defaults_do_not_set:
         targetPort: 8080
         name: http2
         protocol: TCP
+        nodePort: 30088
       - port: 443
         targetPort: 8443
         name: https
         protocol: TCP
+        nodePort: 30443
 
-      # Scalability tuning
+      # Настройка масштабируемости
       # replicaCount: 1
       rollingMaxSurge: 100%
       rollingMaxUnavailable: 25%
@@ -54,17 +57,17 @@ _internal_defaults_do_not_set:
       loadBalancerSourceRanges: []
       serviceAnnotations: {}
 
-      # Setup how istiod Service is configured. See https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
+      # Настройка сервиса istiod. Подробнее: https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
       ipFamilyPolicy: ""
       ipFamilies: []
 
-      # To generate an internal load balancer:
+      # Для генерации внутреннего балансировщика нагрузки:
       # --set serviceAnnotations.cloud.google.com/load-balancer-type=internal
       #serviceAnnotations:
       #    cloud.google.com/load-balancer-type: "internal"
 
       podAnnotations: {}
-      type: LoadBalancer #change to NodePort, ClusterIP or LoadBalancer if need be
+      type: NodePort # изменить на NodePort, ClusterIP или LoadBalancer, если требуется
 
       ##############
       secretVolumes:
@@ -83,64 +86,52 @@ _internal_defaults_do_not_set:
       configVolumes: []
 
       serviceAccount:
-        # Annotations to add to the service account
+        # Аннотации для service account
         annotations: {}
 
-      ### Advanced options ############
+      ### Расширенные параметры ############
       env: {}
       nodeSelector: {}
 
       tolerations: []
 
-      # Specify the pod anti-affinity that allows you to constrain which nodes
-      # your pod is eligible to be scheduled based on labels on pods that are
-      # already running on the node rather than based on labels on nodes.
-      # There are currently two types of anti-affinity:
-      #    "requiredDuringSchedulingIgnoredDuringExecution"
-      #    "preferredDuringSchedulingIgnoredDuringExecution"
-      # which denote "hard" vs. "soft" requirements, you can define your values
-      # in "podAntiAffinityLabelSelector" and "podAntiAffinityTermLabelSelector"
-      # correspondingly.
-      # For example:
+      # Укажите правила pod anti-affinity, которые ограничивают возможность запуска пода
+      # на ноде, если там уже работают другие поды с определёнными метками.
+      # Доступны два типа anti-affinity:
+      #    "requiredDuringSchedulingIgnoredDuringExecution" — жёсткое требование
+      #    "preferredDuringSchedulingIgnoredDuringExecution" — мягкое требование
+      # Укажите значения в "podAntiAffinityLabelSelector" и "podAntiAffinityTermLabelSelector".
+      # Пример:
       # podAntiAffinityLabelSelector:
       # - key: security
       #   operator: In
       #   values: S1,S2
       #   topologyKey: "kubernetes.io/hostname"
-      # This pod anti-affinity rule says that the pod requires not to be scheduled
-      # onto a node if that node is already running a pod with label having key
-      # "security" and value "S1".
+      # Это правило означает, что под не будет запущен на ноде, если на ней уже работает под с меткой security=S1
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
 
-      # whether to run the gateway in a privileged container
+      # Нужно ли запускать шлюз в привилегированном контейнере
       runAsRoot: false
 
-      # The injection template to use for the gateway. If not set, no injection will be performed.
+      # Шаблон для injection. Если не задан, injection не выполняется.
       injectionTemplate: ""
 
-  # Revision is set as 'version' label and part of the resource names when installing multiple control planes.
+  # Метка 'revision' используется как часть имени ресурсов при установке нескольких control plane.
   revision: ""
 
-  # For Helm compatibility.
+  # Для совместимости с Helm.
   ownerName: ""
 
   global:
-    # Default node selector to be applied to all deployments so that all pods can be
-    # constrained to run a particular nodes. Each component can overwrite these default
-    # values by adding its node selector block in the relevant section below and setting
-    # the desired values.
+    # NodeSelector по умолчанию для всех компонентов, чтобы запускать поды на нужных нодах
     defaultNodeSelector: {}
 
-    # enable pod disruption budget for the control plane, which is used to
-    # ensure Istio control plane components are gradually upgraded or recovered.
+    # Включить pod disruption budget для control plane, чтобы обеспечить плавное обновление компонентов.
     defaultPodDisruptionBudget:
       enabled: true
 
-    # A minimal set of requested resources to applied to all deployments so that
-    # Horizontal Pod Autoscaler will be able to function (if set).
-    # Each component can overwrite these default values by adding its own resources
-    # block in the relevant section below and setting the desired resources values.
+    # Минимальные ресурсы по умолчанию для всех компонентов, чтобы работал Horizontal Pod Autoscaler.
     defaultResources:
       requests:
         cpu: 10m
@@ -149,155 +140,100 @@ _internal_defaults_do_not_set:
       #   cpu: 100m
       #   memory: 128Mi
 
-    # Default node tolerations to be applied to all deployments so that all pods can be
-    # scheduled to a particular nodes with matching taints. Each component can overwrite
-    # these default values by adding its tolerations block in the relevant section below
-    # and setting the desired values.
-    # Configure this field in case that all pods of Istio control plane are expected to
-    # be scheduled to particular nodes with specified taints.
+    # Tolerations по умолчанию для всех подов, чтобы они могли быть запущены на нодах с taint.
     defaultTolerations: []
 
-    # Default hub for Istio images.
-    # Releases are published to docker hub under 'istio' project.
-    # Dev builds from prow are on gcr.io
+    # Хаб по умолчанию для образов Istio
     hub: gcr.io/istio-testing
 
-    # Default tag for Istio images.
+    # Тег по умолчанию для образов Istio
     tag: latest
 
-    # Variant of the image to use.
-    # Currently supported are: [debug, distroless]
+    # Вариант образа: debug, distroless
     variant: ""
 
-    # Specify image pull policy if default behavior isn't desired.
-    # Default behavior: latest images will be Always else IfNotPresent.
+    # Политика pull'а образов. По умолчанию: Always для latest, иначе IfNotPresent.
     imagePullPolicy: ""
 
-    # ImagePullSecrets for all ServiceAccount, list of secrets in the same namespace
-    # to use for pulling any images in pods that reference this ServiceAccount.
-    # For components that don't use ServiceAccounts (i.e. grafana, servicegraph, tracing)
-    # ImagePullSecrets will be added to the corresponding Deployment(StatefulSet) objects.
-    # Must be set for any cluster configured with private docker registry.
+    # Секреты для pull'а образов для ServiceAccount (если используется приватный реестр)
     imagePullSecrets: []
     # - private-registry-key
 
-    # To output all istio components logs in json format by adding --log_as_json argument to each container argument
+    # Вывод логов компонентов Istio в JSON-формате (добавляет аргумент --log_as_json)
     logAsJson: false
 
-    # Specify pod scheduling arch(amd64, ppc64le, s390x, arm64) and weight as follows:
-    #   0 - Never scheduled
-    #   1 - Least preferred
-    #   2 - No preference
-    #   3 - Most preferred
+    # Архитектура подов и приоритет:
+    #   0 - Никогда не запускать
+    #   1 - Наименее предпочтительно
+    #   2 - Без предпочтения
+    #   3 - Наиболее предпочтительно
     arch: {}
 
-    # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
-    # The control plane has different scopes depending on component, but can configure default log level across all components
-    # If empty, default scope and level will be used as configured in code
+    # Глобальный уровень логирования по умолчанию для всех компонентов
     logging:
       level: "default:info"
 
-    # Kubernetes >=v1.11.0 will create two PriorityClass, including system-cluster-critical and
-    # system-node-critical, it is better to configure this in order to make sure your Istio pods
-    # will not be killed because of low priority class.
-    # Refer to https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
-    # for more detail.
+    # Kubernetes >=v1.11.0 создаёт два PriorityClass: system-cluster-critical и system-node-critical.
+    # Лучше задать priorityClassName, чтобы Istio-поды не были удалены при нехватке ресурсов.
     priorityClassName: ""
 
     proxy:
       image: proxyv2
 
-      # CAUTION: It is important to ensure that all Istio helm charts specify the same clusterDomain value
-      # cluster domain. Default value is "cluster.local".
+      # ВНИМАНИЕ: все Helm-чарты Istio должны использовать одинаковый clusterDomain
+      # Домен кластера. По умолчанию — "cluster.local".
       clusterDomain: "cluster.local"
 
-      # Per Component log level for proxy, applies to gateways and sidecars. If a component level is
-      # not set, then the global "logLevel" will be used.
+      # Уровень логов компонентов прокси
       componentLogLevel: "misc:error"
 
-      # Log level for proxy, applies to gateways and sidecars.
-      # Expected values are: trace|debug|info|warning|error|critical|off
+      # Уровень логирования прокси
+      # Возможные значения: trace|debug|info|warning|error|critical|off
       logLevel: warning
 
     ##############################################################################################
-    # The following values are found in other charts. To effectively modify these values, make   #
-    # make sure they are consistent across your Istio helm charts                                #
+    # Ниже указаны значения, которые также встречаются в других чартах.                        #
+    # Убедитесь, что они согласованы между собой во всех чартах Istio                          #
     ##############################################################################################
 
-    # The customized CA address to retrieve certificates for the pods in the cluster.
-    # CSR clients such as the Istio Agent and ingress gateways can use this to specify the CA endpoint.
+    # Кастомный адрес CA для получения сертификатов подами
     caAddress: ""
 
-    # Used to locate istiod.
+    # Используется для определения местоположения istiod
     istioNamespace: istio-system
 
-    # Mesh ID means Mesh Identifier. It should be unique within the scope where
-    # meshes will interact with each other, but it is not required to be
-    # globally/universally unique. For example, if any of the following are true,
-    # then two meshes must have different Mesh IDs:
-    # - Meshes will have their telemetry aggregated in one place
-    # - Meshes will be federated together
-    # - Policy will be written referencing one mesh from the other
-    #
-    # If an administrator expects that any of these conditions may become true in
-    # the future, they should ensure their meshes have different Mesh IDs
-    # assigned.
-    #
-    # Within a multicluster mesh, each cluster must be (manually or auto)
-    # configured to have the same Mesh ID value. If an existing cluster 'joins' a
-    # multicluster mesh, it will need to be migrated to the new mesh ID. Details
-    # of migration TBD, and it may be a disruptive operation to change the Mesh
-    # ID post-install.
-    #
-    # If the mesh admin does not specify a value, Istio will use the value of the
-    # mesh's Trust Domain. The best practice is to select a proper Trust Domain
-    # value.
+    # Mesh ID — уникальный идентификатор для взаимодействующих mesh’ей
     meshID: ""
 
-    # Use the user-specified, secret volume mounted key and certs for Pilot and workloads.
+    # Использовать вручную смонтированные сертификаты и ключи для Pilot и подов
     mountMtlsCerts: false
 
     multiCluster:
-      # Set to true to connect two kubernetes clusters via their respective
-      # ingressgateway services when pods in each cluster cannot directly
-      # talk to one another. All clusters should be using Istio mTLS and must
-      # have a shared root CA for this model to work.
+      # Включить поддержку multi-cluster через ingressgateway при невозможности прямой связи между подами
       enabled: false
-      # Should be set to the name of the cluster this installation will run in. This is required for sidecar injection
-      # to properly label proxies
       clusterName: ""
-      # The suffix for global service names
       globalDomainSuffix: "global"
-      # Enable envoy filter to translate `globalDomainSuffix` to cluster local suffix for cross cluster communication
       includeEnvoyFilter: true
 
-    # Network defines the network this cluster belong to. This name
-    # corresponds to the networks in the map of mesh networks.
+    # Имя сети, к которой принадлежит кластер. Используется в multicluster-конфигурации.
     network: ""
 
-    # Configure the certificate provider for control plane communication.
-    # Currently, two providers are supported: "kubernetes" and "istiod".
-    # As some platforms may not have kubernetes signing APIs,
-    # Istiod is the default
+    # Настройка провайдера сертификатов для control plane: kubernetes или istiod
     pilotCertProvider: istiod
 
     sds:
-      # The JWT token for SDS and the aud field of such JWT. See RFC 7519, section 4.1.3.
-      # When a CSR is sent from Citadel Agent to the CA (e.g. Citadel), this aud is to make sure the
-      # JWT is intended for the CA.
+      # JWT-токен для SDS и значение поля aud
       token:
         aud: istio-ca
 
     sts:
-      # The service port used by Security Token Service (STS) server to handle token exchange requests.
-      # Setting this port to a non-zero value enables STS server.
+      # Порт сервиса STS (Security Token Service) для обмена токенами. 0 — отключен.
       servicePort: 0
 
   meshConfig:
     enablePrometheusMerge: true
 
-    # The trust domain corresponds to the trust root of a system
-    # Refer to https://github.com/spiffe/spiffe/blob/master/standards/SPIFFE-ID.md#21-trust-domain
+    # Trust domain — корневой домен доверия
     trustDomain: "cluster.local"
 
     defaultConfig:
@@ -305,9 +241,9 @@ _internal_defaults_do_not_set:
       tracing:
       #      tlsSettings:
       #        mode: DISABLE # DISABLE, SIMPLE, MUTUAL, ISTIO_MUTUAL
-      #        clientCertificate: # example: /etc/istio/tracer/cert-chain.pem
-      #        privateKey:        # example: /etc/istio/tracer/key.pem
-      #        caCertificates:    # example: /etc/istio/tracer/root-cert.pem
-      #        sni:               # example: tracer.somedomain
+      #        clientCertificate: # пример: /etc/istio/tracer/cert-chain.pem
+      #        privateKey:        # пример: /etc/istio/tracer/key.pem
+      #        caCertificates:    # пример: /etc/istio/tracer/root-cert.pem
+      #        sni:               # пример: tracer.somedomain
       #        subjectAltNames: []
       # - tracer.somedomain

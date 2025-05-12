@@ -1,14 +1,42 @@
-global:
-  istioNamespace: istio-system
+# "_internal_defaults_do_not_set" — это обходной путь для ограничений Helm.
+# Пользователям НЕ следует явно задавать "._internal_defaults_do_not_set", вместо этого следует напрямую указывать нужные поля.
+# Например, вместо `--set _internal_defaults_do_not_set.foo=bar`, просто используйте `--set foo=bar`.
+_internal_defaults_do_not_set:
+  global:
 
-base:
-  enableCRDTemplates: true
-  excludedCRDs: []
-  validationURL: ""
-  validationCABundle: ""
-  enableIstioConfigCRDs: true
+    # ImagePullSecrets для ServiceAccount control plane. Список секретов в том же namespace,
+    # которые будут использоваться для pull’а образов в подах, ссылающихся на этот ServiceAccount.
+    # Обязательно указывать, если кластер использует приватный Docker-репозиторий.
+    imagePullSecrets: []
 
-defaultRevision: "default"
+    # Используется для определения расположения istiod.
+    istioNamespace: istio-system
 
-experimental:
-  stableValidationPolicy: false
+  base:
+    # Список CRD, которые следует исключить. Требует, чтобы `enableCRDTemplates` было установлено в true.
+    # Пример: `excludedCRDs: ["envoyfilters.networking.istio.io"]`.
+    # Примечание: при установке с помощью `istioctl` также необходимо установить `enableIstioConfigCRDs=false`.
+    excludedCRDs: []
+
+    # Helm (начиная с версии V3) не поддерживает обновление CRD, так как это не всегда безопасно.
+    # Однако проект Istio обеспечивает обратную совместимость, что позволяет безопасно обновлять CRD.
+    # Поэтому по умолчанию Istio управляет CRD как обычными ресурсами Kubernetes в Helm,
+    # отключая встроенное управление CRD в Helm. Подробнее:
+    # https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#method-2-separate-charts
+    enableCRDTemplates: true
+
+    # URL для webhook'а валидации.
+    # Например: https://$remotePilotAddress:15017/validate
+    validationURL: ""
+
+    # Значение поля caBundle для webhook’а валидации. Полезно при запуске pilot с общедоступным сертификатом.
+    validationCABundle: ""
+
+    # Для использования с istioctl — отключение istio config CRDs в base.
+    enableIstioConfigCRDs: true
+
+  defaultRevision: "default"
+
+  experimental:
+    # Экспериментальный параметр: использовать стабильную политику валидации.
+    stableValidationPolicy: false
