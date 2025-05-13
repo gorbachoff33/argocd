@@ -1,9 +1,13 @@
-defaults:
+# "_internal_defaults_do_not_set" is a workaround for Helm limitations. Users should NOT set "._internal_defaults_do_not_set" explicitly, but rather directly set the fields internally.
+# For instance, instead of `--set _internal_defaults_do_not_set.foo=bar``, just set `--set foo=bar`.
+_internal_defaults_do_not_set:
   # A-la-carte istio ingress gateway.
   # Must be installed in a separate namespace, to minimize access to secrets.
   gateways:
     istio-ingressgateway:
       name: istio-ingressgateway
+      # NOTE that these labels will get encoded implicitly into selectorLabels
+      # if this is a problem, consider using the `gateway` chart instead
       labels:
         app: istio-ingressgateway
         istio: ingressgateway
@@ -43,8 +47,8 @@ defaults:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: 200m
+          memory: 256Mi
 
       loadBalancerIP: ""
       loadBalancerSourceRanges: []
@@ -85,6 +89,7 @@ defaults:
       ### Advanced options ############
       env: {}
       nodeSelector: {}
+
       tolerations: []
 
       # Specify the pod anti-affinity that allows you to constrain which nodes
@@ -121,13 +126,6 @@ defaults:
   ownerName: ""
 
   global:
-    # set the default set of namespaces to which services, service entries, virtual services, destination
-    # rules should be exported to. Currently only one value can be provided in this list. This value
-    # should be one of the following two options:
-    # * implies these objects are visible to all namespaces, enabling any sidecar to talk to any other sidecar.
-    # . implies these objects are visible to only to sidecars in the same namespace, or if imported as a Sidecar.egress.host
-    defaultConfigVisibilitySettings: []
-
     # Default node selector to be applied to all deployments so that all pods can be
     # constrained to run a particular nodes. Each component can overwrite these default
     # values by adding its node selector block in the relevant section below and setting
@@ -217,9 +215,6 @@ defaults:
       # not set, then the global "logLevel" will be used.
       componentLogLevel: "misc:error"
 
-      # If set, newly injected sidecars will have core dumps enabled.
-      enableCoreDump: false
-
       # Log level for proxy, applies to gateways and sidecars.
       # Expected values are: trace|debug|info|warning|error|critical|off
       logLevel: warning
@@ -235,10 +230,6 @@ defaults:
 
     # Used to locate istiod.
     istioNamespace: istio-system
-
-    # Configure the policy for validating JWT.
-    # Currently, two options are supported: "third-party-jwt" and "first-party-jwt".
-    jwtPolicy: "third-party-jwt"
 
     # Mesh ID means Mesh Identifier. It should be unique within the scope where
     # meshes will interact with each other, but it is not required to be
@@ -301,9 +292,6 @@ defaults:
       # The service port used by Security Token Service (STS) server to handle token exchange requests.
       # Setting this port to a non-zero value enables STS server.
       servicePort: 0
-    # whether to use autoscaling/v2 template for HPA settings
-    # for internal usage only, not to be configured by users.
-    autoscalingv2API: true
 
   meshConfig:
     enablePrometheusMerge: true

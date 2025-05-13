@@ -1,92 +1,113 @@
-defaults:
-  #.Values.pilot for discovery and mesh wide config
+# "_internal_defaults_do_not_set" is a workaround for Helm limitations. Users should NOT set "._internal_defaults_do_not_set" explicitly, but rather directly set the fields internally.
+# For instance, instead of `--set _internal_defaults_do_not_set.foo=bar``, just set `--set foo=bar`.
+_internal_defaults_do_not_set:
+  autoscaleEnabled: true
+  autoscaleMin: 1
+  autoscaleMax: 5
+  autoscaleBehavior: {}
+  replicaCount: 1
+  rollingMaxSurge: 100%
+  rollingMaxUnavailable: 25%
 
-  ## Discovery Settings
-  pilot:
-    autoscaleEnabled: true
-    autoscaleMin: 1
-    autoscaleMax: 5
-    autoscaleBehavior: {}
-    replicaCount: 1
-    rollingMaxSurge: 100%
-    rollingMaxUnavailable: 25%
+  hub: ""
+  tag: ""
+  variant: ""
 
-    hub: ""
-    tag: ""
-    variant: ""
+  # Can be a full hub/image:tag
+  image: pilot
+  traceSampling: 1.0
 
-    # Can be a full hub/image:tag
-    image: pilot
-    traceSampling: 1.0
+  # Resources for a small pilot install
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2048Mi
 
-    # Resources for a small pilot install
-    resources:
-      requests:
-        cpu: 500m
-        memory: 2048Mi
+  # Set to `type: RuntimeDefault` to use the default profile if available.
+  seccompProfile: {}
 
-    # Set to `type: RuntimeDefault` to use the default profile if available.
-    seccompProfile: {}
+  # Whether to use an existing CNI installation
+  cni:
+    enabled: false
+    provider: default
 
-    # Additional container arguments
-    extraContainerArgs: []
+  # Additional container arguments
+  extraContainerArgs: []
 
-    env: {}
+  env: {}
 
-    affinity: {}
+  envVarFrom: []
 
-    tolerations: []
+  # Settings related to the untaint controller
+  # This controller will remove `cni.istio.io/not-ready` from nodes when the istio-cni pod becomes ready
+  # It should be noted that cluster operator/owner is responsible for having the taint set by their infrastructure provider when new nodes are added to the cluster; the untaint controller does not taint nodes
+  taint:
+    # Controls whether or not the untaint controller is active
+    enabled: false
+    # What namespace the untaint controller should watch for istio-cni pods. This is only required when istio-cni is running in a different namespace than istiod
+    namespace: ""
 
-    cpu:
-      targetAverageUtilization: 80
-    memory: {}
-      # targetAverageUtilization: 80
+  affinity: {}
 
-    # Additional volumeMounts to the istiod container
-    volumeMounts: []
+  tolerations: []
 
-    # Additional volumes to the istiod pod
-    volumes: []
+  cpu:
+    targetAverageUtilization: 80
+  memory: {}
+    # targetAverageUtilization: 80
 
-    nodeSelector: {}
-    podAnnotations: {}
-    serviceAnnotations: {}
+  # Additional volumeMounts to the istiod container
+  volumeMounts: []
 
-    topologySpreadConstraints: []
+  # Additional volumes to the istiod pod
+  volumes: []
 
-    # You can use jwksResolverExtraRootCA to provide a root certificate
-    # in PEM format. This will then be trusted by pilot when resolving
-    # JWKS URIs.
-    jwksResolverExtraRootCA: ""
+  # Inject initContainers into the istiod pod
+  initContainers: []
 
-    # This is used to set the source of configuration for
-    # the associated address in configSource, if nothing is specified
-    # the default MCP is assumed.
-    configSource:
-      subscribedResources: []
+  nodeSelector: {}
+  podAnnotations: {}
+  serviceAnnotations: {}
+  serviceAccountAnnotations: {}
+  sidecarInjectorWebhookAnnotations: {}
 
-    plugins: []
+  topologySpreadConstraints: []
 
-    # The following is used to limit how long a sidecar can be connected
-    # to a pilot. It balances out load across pilot instances at the cost of
-    # increasing system churn.
-    keepaliveMaxServerConnectionAge: 30m
+  # You can use jwksResolverExtraRootCA to provide a root certificate
+  # in PEM format. This will then be trusted by pilot when resolving
+  # JWKS URIs.
+  jwksResolverExtraRootCA: ""
 
-    # Additional labels to apply to the deployment.
-    deploymentLabels: {}
+  # The following is used to limit how long a sidecar can be connected
+  # to a pilot. It balances out load across pilot instances at the cost of
+  # increasing system churn.
+  keepaliveMaxServerConnectionAge: 30m
 
-    ## Mesh config settings
+  # Additional labels to apply to the deployment.
+  deploymentLabels: {}
 
-    # Install the mesh config map, generated from values.yaml.
-    # If false, pilot wil use default values (by default) or user-supplied values.
-    configMap: true
+  ## Mesh config settings
 
-    # Additional labels to apply on the pod level for monitoring and logging configuration.
-    podLabels: {}
+  # Install the mesh config map, generated from values.yaml.
+  # If false, pilot wil use default values (by default) or user-supplied values.
+  configMap: true
 
-    # Setup how istiod Service is configured. See https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
-    ipFamilyPolicy: ""
-    ipFamilies: []
+  # Additional labels to apply on the pod level for monitoring and logging configuration.
+  podLabels: {}
+
+  # Setup how istiod Service is configured. See https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
+  ipFamilyPolicy: ""
+  ipFamilies: []
+
+  # Ambient mode only.
+  # Set this if you install ztunnel to a different namespace from `istiod`.
+  # If set, `istiod` will allow connections from trusted node proxy ztunnels
+  # in the provided namespace.
+  # If unset, `istiod` will assume the trusted node proxy ztunnel resides
+  # in the same namespace as itself.
+  trustedZtunnelNamespace: ""
+  # Set this if you install ztunnel with a name different from the default.
+  trustedZtunnelName: ""
 
   sidecarInjectorWebhook:
     # You can use the field called alwaysInjectSelector and neverInjectSelector which will always inject the sidecar or
@@ -149,6 +170,10 @@ defaults:
     # defaultTemplates: ["sidecar", "hello"]
     defaultTemplates: []
   istiodRemote:
+    # If `true`, indicates that this cluster/install should consume a "remote istiod" installation,
+    # and istiod itself will NOT be installed in this cluster - only the support resources necessary
+    # to utilize a remote instance.
+    enabled: false
     # Sidecar injector mutating webhook configuration clientConfig.url value.
     # For example: https://$remotePilotAddress:15017/inject
     # The host should not refer to a service running in the cluster; use a service reference by specifying
@@ -158,6 +183,8 @@ defaults:
     # Sidecar injector mutating webhook configuration path value for the clientConfig.service field.
     # Override to pass env variables, for example: /inject/cluster/remote/net/network2
     injectionPath: "/inject"
+
+    injectionCABundle: ""
   telemetry:
     enabled: true
     v2:
@@ -183,6 +210,9 @@ defaults:
   # See https://istio.io/docs/reference/config/istio.mesh.v1alpha1/ for all available options
   meshConfig:
     enablePrometheusMerge: true
+
+  experimental:
+    stableValidationPolicy: false
 
   global:
     # Used to locate istiod.
@@ -216,7 +246,7 @@ defaults:
     # Dev builds from prow are on gcr.io
     hub: docker.io/istio
     # Default tag for Istio images.
-    tag: 1.22.0
+    tag: 1.26.0
     # Variant of the image to use.
     # Currently supported are: [debug, distroless]
     variant: ""
@@ -247,10 +277,6 @@ defaults:
       level: "default:info"
 
     omitSidecarInjectorConfigMap: false
-
-    # Whether to restrict the applications namespace the controller manages;
-    # If not set, controller watches all namespaces
-    oneNamespace: false
 
     # Configure whether Operator manages webhook configurations. The current behavior
     # of Istiod is to manage its own webhook configurations.
@@ -292,9 +318,6 @@ defaults:
       # not set, then the global "logLevel" will be used.
       componentLogLevel: "misc:error"
 
-      # If set, newly injected sidecars will have core dumps enabled.
-      enableCoreDump: false
-
       # istio ingress capture allowlist
       # examples:
       #     Redirect only selected ports:            --includeInboundPorts="80,8080"
@@ -314,6 +337,10 @@ defaults:
       # Log level for proxy, applies to gateways and sidecars.
       # Expected values are: trace|debug|info|warning|error|critical|off
       logLevel: warning
+
+      # Specify the path to the outlier event log.
+      # Example: /dev/stdout
+      outlierLogPath: ""
 
       #If set to true, istio-proxy container will have privileged securityContext
       privileged: false
@@ -346,19 +373,22 @@ defaults:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: 2000m
+          memory: 1024Mi
 
       # Default port for Pilot agent health checks. A value of 0 will disable health checking.
       statusPort: 15020
 
-      # Specify which tracer to use. One of: zipkin, lightstep, datadog, stackdriver.
+      # Specify which tracer to use. One of: zipkin, lightstep, datadog, stackdriver, none.
       # If using stackdriver tracer outside GCP, set env GOOGLE_APPLICATION_CREDENTIALS to the GCP credential file.
-      tracer: "zipkin"
+      tracer: "none"
 
     proxy_init:
       # Base name for the proxy_init container, used to configure iptables.
       image: proxyv2
+      # Bypasses iptables idempotency handling, and attempts to apply iptables rules regardless of table state, which may cause unrecoverable failures.
+      # Do not use unless you need to work around an issue of the idempotency handling. This flag will be removed in future releases.
+      forceApplyIptables: false
 
     # configure remote pilot and istiod service and endpoint
     remotePilotAddress: ""
@@ -373,17 +403,14 @@ defaults:
     # If not set explicitly, default to the Istio discovery address.
     caAddress: ""
 
-    # Configure a remote cluster data plane controlled by an external istiod.
-    # When set to true, istiod is not deployed locally and only a subset of the other
-    # discovery charts are enabled.
+    # Enable control of remote clusters.
     externalIstiod: false
 
     # Configure a remote cluster as the config cluster for an external istiod.
     configCluster: false
 
-    # Configure the policy for validating JWT.
-    # Currently, two options are supported: "third-party-jwt" and "first-party-jwt".
-    jwtPolicy: "third-party-jwt"
+    # configValidation enables the validation webhook for Istio configuration.
+    configValidation: true
 
     # Mesh ID means Mesh Identifier. It should be unique within the scope where
     # meshes will interact with each other, but it is not required to be
@@ -479,18 +506,31 @@ defaults:
     # mechanisms (e.g., environmental variable CA_PROVIDER).
     caName: ""
 
-    # whether to use autoscaling/v2 template for HPA settings
-    # for internal usage only, not to be configured by users.
-    autoscalingv2API: true
+    waypoint:
+      # Resources for the waypoint proxy.
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: "2"
+          memory: 1Gi
+
+      # If specified, affinity defines the scheduling constraints of waypoint pods.
+      affinity: {}
+
+      # Topology Spread Constraints for the waypoint proxy.
+      topologySpreadConstraints: []
+
+      # Node labels for the waypoint proxy.
+      nodeSelector: {}
+
+      # Tolerations for the waypoint proxy.
+      tolerations: []
 
   base:
     # For istioctl usage to disable istio config crds in base
     enableIstioConfigCRDs: true
-
-    #  keep in sync with settings used when installing the Istio CNI chart
-  istio_cni:
-    enabled: false
-    chained: true
 
   # Gateway Settings
   gateways:
@@ -498,3 +538,16 @@ defaults:
     # If unset, this will be automatically set to the minimum privileges required to bind to port 80 and 443.
     # On Kubernetes 1.22+, this only requires the `net.ipv4.ip_unprivileged_port_start` sysctl.
     securityContext: {}
+
+    # Set to `type: RuntimeDefault` to use the default profile for templated gateways, if your container runtime supports it
+    seccompProfile: {}
+
+  # gatewayClasses allows customizing the configuration of the default deployment of Gateways per GatewayClass.
+  # For example:
+  # gatewayClasses:
+  #   istio:
+  #     service:
+  #       spec:
+  #         type: ClusterIP
+  # Per-Gateway configuration can also be set in the `Gateway.spec.infrastructure.parametersRef` field.
+  gatewayClasses: {}
