@@ -20,8 +20,8 @@ _internal_defaults_do_not_set:
   # Resources for a small pilot install
   resources:
     requests:
-      cpu: 500m
-      memory: 2048Mi
+      cpu: 200m
+      memory: 256Mi
 
   # Set to `type: RuntimeDefault` to use the default profile if available.
   seccompProfile: {}
@@ -213,13 +213,7 @@ _internal_defaults_do_not_set:
 
   experimental:
     stableValidationPolicy: false
-
-  pilot:
-  readinessProbe:
-    initialDelaySeconds: 20
-    periodSeconds: 5
-    timeoutSeconds: 5
-    
+  
   global:
     # Used to locate istiod.
     istioNamespace: istio-system
