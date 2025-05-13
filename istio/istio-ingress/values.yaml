@@ -47,8 +47,8 @@ _internal_defaults_do_not_set:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 2000m
+          memory: 1024Mi
 
       loadBalancerIP: ""
       loadBalancerSourceRanges: []
@@ -89,7 +89,6 @@ _internal_defaults_do_not_set:
       ### Advanced options ############
       env: {}
       nodeSelector: {}
-
       tolerations: []
 
       # Specify the pod anti-affinity that allows you to constrain which nodes
