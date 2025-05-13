@@ -1,6 +1,6 @@
 defaults:
-  # Отдельный (standalone) istio egress gateway.
-  # Должен быть установлен в отдельном namespace, чтобы минимизировать доступ к конфигурации.
+  # Standalone istio egress gateway.
+  # Should be installed in a separate namespace, to minimize access to config
   gateways:
     istio-egressgateway:
       name: istio-egressgateway
@@ -18,7 +18,7 @@ defaults:
         app: istio-egressgateway
         istio: egressgateway
 
-      # Настройки масштабируемости
+      # Scalability tuning
       # replicaCount: 1
       rollingMaxSurge: 100%
       rollingMaxUnavailable: 25%
@@ -30,8 +30,8 @@ defaults:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 2000m
+          memory: 1024Mi
       cpu:
         targetAverageUtilization: 80
       memory: {}
@@ -39,9 +39,9 @@ defaults:
 
       serviceAnnotations: {}
       podAnnotations: {}
-      type: ClusterIP # изменить на NodePort или LoadBalancer при необходимости
+      type: ClusterIP # change to NodePort or LoadBalancer if need be
 
-      # Настройка службы istiod. Подробнее: https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
+      # Setup how istiod Service is configured. See https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
       ipFamilyPolicy: ""
       ipFamilies: []
 
@@ -57,64 +57,80 @@ defaults:
       additionalContainers: []
 
       serviceAccount:
-        # Аннотации для service account
+        # Annotations to add to the service account
         annotations: {}
 
-      ### Расширенные параметры ############
-      # TODO: переделать в реальные параметры, env не должен быть напрямую доступен
+      ### Advanced options ############
+      # TODO: convert to real options, env should not be exposed
       env: {}
-        # Установите значение "external" только в том случае, если вы хотите,
-        # чтобы egress gateway действовал как прозрачный SNI шлюз, маршрутизирующий
-        # mTLS/TLS-трафик к внешним сервисам через service entries с разрешением DNS
-        # и endpoint-ами, у которых поле network установлено в "external".
-        # По умолчанию пусто, чтобы egress видел те же endpoints, что и sidecar’ы,
-        # для обеспечения обратной совместимости.
+        # Set this to "external" if and only if you want the egress gateway to
+        # act as a transparent SNI gateway that routes mTLS/TLS traffic to
+        # external services defined using service entries, where the service
+        # entry has resolution set to DNS, has one or more endpoints with
+        # network field set to "external". By default its set to "" so that
+        # the egress gateway sees the same set of endpoints as the sidecars
+        # preserving backward compatibility
         # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
 
       nodeSelector: {}
       tolerations: []
 
-      # Указание правил pod anti-affinity, ограничивающих запуск пода на узлах,
-      # где уже работают поды с определёнными метками.
-      # Доступны два типа anti-affinity:
-      #    "requiredDuringSchedulingIgnoredDuringExecution" — жёсткое требование
-      #    "preferredDuringSchedulingIgnoredDuringExecution" — мягкое требование
-      # Пример:
+      # Specify the pod anti-affinity that allows you to constrain which nodes
+      # your pod is eligible to be scheduled based on labels on pods that are
+      # already running on the node rather than based on labels on nodes.
+      # There are currently two types of anti-affinity:
+      #    "requiredDuringSchedulingIgnoredDuringExecution"
+      #    "preferredDuringSchedulingIgnoredDuringExecution"
+      # which denote "hard" vs. "soft" requirements, you can define your values
+      # in "podAntiAffinityLabelSelector" and "podAntiAffinityTermLabelSelector"
+      # correspondingly.
+      # For example:
       # podAntiAffinityLabelSelector:
       # - key: security
       #   operator: In
       #   values: S1,S2
       #   topologyKey: "kubernetes.io/hostname"
-      # Это правило запрещает запуск пода на узле, где уже есть под с меткой security=S1
+      # This pod anti-affinity rule says that the pod requires not to be scheduled
+      # onto a node if that node is already running a pod with label having key
+      # "security" and value "S1".
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
 
-      # Запускать ли шлюз в привилегированном контейнере
+      # whether to run the gateway in a privileged container
       runAsRoot: false
 
-      # Шаблон injection для шлюза. Если не задан — injection не будет выполнен.
+      # The injection template to use for the gateway. If not set, no injection will be performed.
       injectionTemplate: ""
 
-  # Метка revision используется как часть имени ресурса при установке нескольких control plane
+  # Revision is set as 'version' label and part of the resource names when installing multiple control planes.
   revision: ""
 
-  # Для совместимости с Helm
+  # For Helm compatibility.
   ownerName: ""
 
   global:
-    # Значения по умолчанию для экспортируемых сервисов, virtual services, destination rules и т.д.
-    # * — объекты доступны во всех namespace’ах
-    # . — объекты доступны только в текущем namespace или если явно указаны в Sidecar.egress.host
+    # set the default set of namespaces to which services, service entries, virtual services, destination
+    # rules should be exported to. Currently only one value can be provided in this list. This value
+    # should be one of the following two options:
+    # * implies these objects are visible to all namespaces, enabling any sidecar to talk to any other sidecar.
+    # . implies these objects are visible to only to sidecars in the same namespace, or if imported as a Sidecar.egress.host
     defaultConfigVisibilitySettings: []
 
-    # NodeSelector по умолчанию для всех компонентов
+    # Default node selector to be applied to all deployments so that all pods can be
+    # constrained to run a particular nodes. Each component can overwrite these default
+    # values by adding its node selector block in the relevant section below and setting
+    # the desired values.
     defaultNodeSelector: {}
 
-    # Включить Pod Disruption Budget для control plane
+    # enable pod disruption budget for the control plane, which is used to
+    # ensure Istio control plane components are gradually upgraded or recovered.
     defaultPodDisruptionBudget:
       enabled: true
 
-    # Ресурсы по умолчанию для запуска HPA
+    # A minimal set of requested resources to applied to all deployments so that
+    # Horizontal Pod Autoscaler will be able to function (if set).
+    # Each component can overwrite these default values by adding its own resources
+    # block in the relevant section below and setting the desired resources values.
     defaultResources:
       requests:
         cpu: 10m
@@ -123,106 +139,158 @@ defaults:
       #   cpu: 100m
       #   memory: 128Mi
 
-    # Tolerations по умолчанию для запуска подов на нодах с taint
+    # Default node tolerations to be applied to all deployments so that all pods can be
+    # scheduled to a particular nodes with matching taints. Each component can overwrite
+    # these default values by adding its tolerations block in the relevant section below
+    # and setting the desired values.
+    # Configure this field in case that all pods of Istio control plane are expected to
+    # be scheduled to particular nodes with specified taints.
     defaultTolerations: []
 
-    # Хаб по умолчанию для образов Istio
+    # Default hub for Istio images.
+    # Releases are published to docker hub under 'istio' project.
+    # Dev builds from prow are on gcr.io
     hub: gcr.io/istio-testing
 
-    # Тег по умолчанию для образов
+    # Default tag for Istio images.
     tag: latest
 
-    # Политика pull'а образов. По умолчанию: Always для latest, иначе IfNotPresent
+    # Specify image pull policy if default behavior isn't desired.
+    # Default behavior: latest images will be Always else IfNotPresent.
     imagePullPolicy: ""
 
-    # Секреты pull'а образов для ServiceAccount
+    # ImagePullSecrets for all ServiceAccount, list of secrets in the same namespace
+    # to use for pulling any images in pods that reference this ServiceAccount.
+    # For components that don't use ServiceAccounts (i.e. grafana, servicegraph, tracing)
+    # ImagePullSecrets will be added to the corresponding Deployment(StatefulSet) objects.
+    # Must be set for any cluster configured with private docker registry.
     imagePullSecrets: []
     # - private-registry-key
 
-    # Вывод логов компонентов Istio в JSON формате
+    # To output all istio components logs in json format by adding --log_as_json argument to each container argument
     logAsJson: false
 
-    # Указание архитектур и приоритетов планирования подов:
-    # 0 — никогда не запускать
-    # 1 — наименее предпочтительно
-    # 2 — без предпочтений
-    # 3 — наиболее предпочтительно
+    # Specify pod scheduling arch(amd64, ppc64le, s390x, arm64) and weight as follows:
+    #   0 - Never scheduled
+    #   1 - Least preferred
+    #   2 - No preference
+    #   3 - Most preferred
     arch: {}
 
-    # Минимальные уровни логирования на скоуп
+    # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
+    # The control plane has different scopes depending on component, but can configure default log level across all components
+    # If empty, default scope and level will be used as configured in code
     logging:
       level: "default:info"
 
-    # Kubernetes >=v1.11.0 создаёт system-cluster-critical и system-node-critical.
-    # Лучше задать приоритет явно.
-    # Подробнее: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    # Kubernetes >=v1.11.0 will create two PriorityClass, including system-cluster-critical and
+    # system-node-critical, it is better to configure this in order to make sure your Istio pods
+    # will not be killed because of low priority class.
+    # Refer to https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    # for more detail.
     priorityClassName: ""
 
     proxy:
       image: proxyv2
 
-      # ВНИМАНИЕ: все чарты Istio должны использовать одинаковый clusterDomain
+      # CAUTION: It is important to ensure that all Istio helm charts specify the same clusterDomain value
+      # cluster domain. Default value is "cluster.local".
       clusterDomain: "cluster.local"
 
-      # Уровень логов по компонентам
+      # Per Component log level for proxy, applies to gateways and sidecars. If a component level is
+      # not set, then the global "logLevel" will be used.
       componentLogLevel: "misc:error"
 
-      # Включить core dump для новых sidecar’ов
+      # If set, newly injected sidecars will have core dumps enabled.
       enableCoreDump: false
 
-      # Уровень логирования прокси
-      # Допустимые значения: trace|debug|info|warning|error|critical|off
+      # Log level for proxy, applies to gateways and sidecars.
+      # Expected values are: trace|debug|info|warning|error|critical|off
       logLevel: warning
 
     ##############################################################################################
-    # Следующие параметры встречаются в других чартах. Для корректной настройки убедитесь,       #
-    # что они согласованы между всеми helm-чартами Istio                                        #
+    # The following values are found in other charts. To effectively modify these values, make   #
+    # make sure they are consistent across your Istio helm charts                                #
     ##############################################################################################
 
-    # Кастомный адрес CA для получения сертификатов
+    # The customized CA address to retrieve certificates for the pods in the cluster.
+    # CSR clients such as the Istio Agent and ingress gateways can use this to specify the CA endpoint.
     caAddress: ""
 
-    # Namespace, где находится istiod
+    # Used to locate istiod.
     istioNamespace: istio-system
 
-    # Настройка политики валидации JWT: "third-party-jwt" или "first-party-jwt"
+    # Configure the policy for validating JWT.
+    # Currently, two options are supported: "third-party-jwt" and "first-party-jwt".
     jwtPolicy: "third-party-jwt"
 
-    # Уникальный идентификатор mesh (meshID)
+    # Mesh ID means Mesh Identifier. It should be unique within the scope where
+    # meshes will interact with each other, but it is not required to be
+    # globally/universally unique. For example, if any of the following are true,
+    # then two meshes must have different Mesh IDs:
+    # - Meshes will have their telemetry aggregated in one place
+    # - Meshes will be federated together
+    # - Policy will be written referencing one mesh from the other
+    #
+    # If an administrator expects that any of these conditions may become true in
+    # the future, they should ensure their meshes have different Mesh IDs
+    # assigned.
+    #
+    # Within a multicluster mesh, each cluster must be (manually or auto)
+    # configured to have the same Mesh ID value. If an existing cluster 'joins' a
+    # multicluster mesh, it will need to be migrated to the new mesh ID. Details
+    # of migration TBD, and it may be a disruptive operation to change the Mesh
+    # ID post-install.
+    #
+    # If the mesh admin does not specify a value, Istio will use the value of the
+    # mesh's Trust Domain. The best practice is to select a proper Trust Domain
+    # value.
     meshID: ""
 
-    # Использовать вручную смонтированные ключи и сертификаты
+    # Use the user-specified, secret volume mounted key and certs for Pilot and workloads.
     mountMtlsCerts: false
 
     multiCluster:
-      # Включить соединение между двумя кластерами через ingressgateway
+      # Set to true to connect two kubernetes clusters via their respective
+      # ingressgateway services when pods in each cluster cannot directly
+      # talk to one another. All clusters should be using Istio mTLS and must
+      # have a shared root CA for this model to work.
       enabled: false
-      # Имя кластера, где выполняется установка (нужно для sidecar injection)
+      # Should be set to the name of the cluster this installation will run in. This is required for sidecar injection
+      # to properly label proxies
       clusterName: ""
 
-    # Название сети, к которой относится кластер
+    # Network defines the network this cluster belong to. This name
+    # corresponds to the networks in the map of mesh networks.
     network: ""
 
-    # Настройка поставщика сертификатов для control plane: "kubernetes" или "istiod"
+    # Configure the certificate provider for control plane communication.
+    # Currently, two providers are supported: "kubernetes" and "istiod".
+    # As some platforms may not have kubernetes signing APIs,
+    # Istiod is the default
     pilotCertProvider: istiod
 
     sds:
-      # JWT-токен и значение aud. Подробнее в RFC 7519, секция 4.1.3
+      # The JWT token for SDS and the aud field of such JWT. See RFC 7519, section 4.1.3.
+      # When a CSR is sent from Citadel Agent to the CA (e.g. Citadel), this aud is to make sure the
+      # JWT is intended for the CA.
       token:
         aud: istio-ca
 
     sts:
-      # Порт STS-сервиса. Установка отличного от 0 значения активирует STS
+      # The service port used by Security Token Service (STS) server to handle token exchange requests.
+      # Setting this port to a non-zero value enables STS server.
       servicePort: 0
 
-    # Использовать ли шаблон autoscaling/v2 для HPA. Только для внутреннего использования.
+    # whether to use autoscaling/v2 template for HPA settings
+    # for internal usage only, not to be configured by users.
     autoscalingv2API: true
 
   meshConfig:
     enablePrometheusMerge: true
 
-    # Trust domain — корень доверия системы.
-    # Подробнее: https://github.com/spiffe/spiffe/blob/master/standards/SPIFFE-ID.md#21-trust-domain
+    # The trust domain corresponds to the trust root of a system
+    # Refer to https://github.com/spiffe/spiffe/blob/master/standards/SPIFFE-ID.md#21-trust-domain
     trustDomain: "cluster.local"
 
     defaultConfig:
@@ -230,9 +298,9 @@ defaults:
       tracing:
       #      tlsSettings:
       #        mode: DISABLE # DISABLE, SIMPLE, MUTUAL, ISTIO_MUTUAL
-      #        clientCertificate: # пример: /etc/istio/tracer/cert-chain.pem
-      #        privateKey:        # пример: /etc/istio/tracer/key.pem
-      #        caCertificates:    # пример: /etc/istio/tracer/root-cert.pem
-      #        sni:               # пример: tracer.somedomain
+      #        clientCertificate: # example: /etc/istio/tracer/cert-chain.pem
+      #        privateKey:        # example: /etc/istio/tracer/key.pem
+      #        caCertificates:    # example: /etc/istio/tracer/root-cert.pem
+      #        sni:               # example: tracer.somedomain
       #        subjectAltNames: []
       # - tracer.somedomain
