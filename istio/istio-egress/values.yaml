@@ -30,8 +30,8 @@ defaults:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 2000m
-          memory: 1024Mi
+          cpu: 500m
+          memory: 512Mi
       cpu:
         targetAverageUtilization: 80
       memory: {}
