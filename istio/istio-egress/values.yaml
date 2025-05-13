@@ -34,8 +34,8 @@ _internal_defaults_do_not_set:
           cpu: 100m
           memory: 128Mi
         limits:
-          cpu: 2000m
-          memory: 1024Mi
+          cpu: 200m
+          memory: 256Mi
       cpu:
         targetAverageUtilization: 80
       memory: {}
