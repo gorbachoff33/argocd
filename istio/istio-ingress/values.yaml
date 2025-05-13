@@ -25,12 +25,10 @@ _internal_defaults_do_not_set:
         targetPort: 8080
         name: http2
         protocol: TCP
-        nodePort: 30088
       - port: 443
         targetPort: 8443
         name: https
         protocol: TCP
-        nodePort: 30843
 
       # Настройка масштабируемости
       # replicaCount: 1
@@ -67,7 +65,7 @@ _internal_defaults_do_not_set:
       #    cloud.google.com/load-balancer-type: "internal"
 
       podAnnotations: {}
-      type: NodePort # изменить на NodePort, ClusterIP или LoadBalancer, если требуется
+      type: LoadBalancer # изменить на NodePort, ClusterIP или LoadBalancer, если требуется
 
       ##############
       secretVolumes:
