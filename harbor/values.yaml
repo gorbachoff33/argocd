@@ -282,7 +282,7 @@ nginx:
     pullSecrets: []
     debug: false
   tls:
-    enabled: true
+    enabled: false
     existingSecret: ""
     commonName: core.harbor.domain
   behindReverseProxy: true
