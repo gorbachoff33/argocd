@@ -502,7 +502,6 @@ portal:
     ingressNSMatchLabels: {}
     ingressNSPodMatchLabels: {}
 core:
-  existingEnvVarsSecret: "harbor-admin-env"
   image:
     registry: docker.io
     repository: bitnami/harbor-core
@@ -519,6 +518,7 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
+  existingEnvVarsSecret: "harbor-admin-env"
   csrfKey: ""
   tls:
     existingSecret: ""
@@ -527,7 +527,14 @@ core:
   extraEnvVars: []
   extraEnvVarsCM: ""
   extraEnvVarsSecret: ""
-  configOverwriteJson: {}
+  configOverwriteJson: |
+    {
+      "project_creation_restriction": "everyone",
+      "self_registration": false,
+      "token_expiration": 30,
+      "robot_token_duration": 43200,
+      "read_only": false
+    }
   configOverwriteJsonSecret: ""
   containerPorts:
     http: 8080
