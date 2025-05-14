@@ -472,6 +472,7 @@ portal:
     ingressNSMatchLabels: {}
     ingressNSPodMatchLabels: {}
 core:
+  existingEnvVarsSecret: "harbor-creds"
   image:
     registry: docker.io
     repository: bitnami/harbor-core
@@ -488,7 +489,7 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
-  existingEnvVarsSecret: "harbor-creds"
+  existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
     existingSecret: ""
