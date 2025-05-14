@@ -207,7 +207,13 @@ migration:
   extraEnvVarsSecret: ""
   extraVolumeMounts: []
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   networkPolicy:
     enabled: true
     allowExternal: true
@@ -238,7 +244,13 @@ tracing:
 
 certificateVolume:
   resourcesPreset: "nano"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 volumePermissions:
   enabled: false
   image:
@@ -249,7 +261,13 @@ volumePermissions:
     pullPolicy: IfNotPresent
     pullSecrets: []
   resourcesPreset: "nano"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   containerSecurityContext:
     enabled: true
     seLinuxOptions: {}
@@ -302,7 +320,13 @@ nginx:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -407,7 +431,13 @@ portal:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -538,7 +568,13 @@ core:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -655,7 +691,13 @@ jobservice:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -829,7 +871,13 @@ registry:
     customReadinessProbe: {}
     customStartupProbe: {}
     resourcesPreset: "small"
-    resources: {}
+    resources:
+      requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
     containerSecurityContext:
       enabled: true
       seLinuxOptions: {}
@@ -892,7 +940,13 @@ registry:
     customReadinessProbe: {}
     customStartupProbe: {}
     resourcesPreset: "small"
-    resources: {}
+    resources:
+      requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
     containerSecurityContext:
       enabled: true
       seLinuxOptions: {}
@@ -970,7 +1024,13 @@ trivy:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "small"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -1076,7 +1136,13 @@ exporter:
   customReadinessProbe: {}
   customStartupProbe: {}
   resourcesPreset: "nano"
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
   podSecurityContext:
     enabled: true
     fsGroupChangePolicy: Always
@@ -1156,7 +1222,13 @@ postgresql:
           \c registry;
           CREATE TABLE schema_migrations(version bigint not null primary key, dirty boolean not null);
     resourcesPreset: "nano"
-    resources: {}
+    resources:
+      requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 externalDatabase:
   host: localhost
   port: 5432
@@ -1190,7 +1262,13 @@ redis:
         sentinel: 26379
   master:
     resourcesPreset: "nano"
-    resources: {}
+    resources:
+      requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 externalRedis:
   host: localhost
   port: 6379
