@@ -502,7 +502,7 @@ portal:
     ingressNSMatchLabels: {}
     ingressNSPodMatchLabels: {}
 core:
-  existingEnvVarsSecret: "harbor-creds"
+  existingEnvVarsSecret: "harbor-admin-env"
   image:
     registry: docker.io
     repository: bitnami/harbor-core
