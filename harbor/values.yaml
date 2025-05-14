@@ -1,0 +1,25 @@
+externalURL: "http://8761.online-vds.ru:32001/harbor"
+
+core:
+  existingEnvVarsSecret: harbor-admin-env
+  configOverwriteJson: |
+    {
+      "project_creation_restriction": "everyone",
+      "self_registration": false,
+      "token_expiration": 30,
+      "robot_token_duration": 43200,
+      "read_only": false,
+      "automatically_create_project": true
+    }
+
+exposureType: nodePort
+
+service:
+  type: NodePort
+  nodePorts:
+    http: 32001
+  ports:
+    http: 80
+
+nginx:
+  behindReverseProxy: true

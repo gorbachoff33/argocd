@@ -1,6 +1,6 @@
 # controller:
 #   admin:
-#     existingSecret: jenkins-admin-creds
+#     existingSecret: jenkins-creds
 #   serviceType: NodePort
 #   nodePort: 32000
 
@@ -40,6 +40,15 @@ credentialsId:
 renderHelmLabels: true
 
 controller:
+  additionalVolumes:
+    - name: shared-pipeline
+      configMap:
+        name: jenkins-shared-pipeline
+
+  additionalMounts:
+    - name: shared-pipeline
+      mountPath: /var/jenkins_shared
+      readOnly: true
   # -- Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
   image:
@@ -101,7 +110,7 @@ controller:
     createSecret: true
 
     # -- The name of an existing secret containing the admin credentials
-    existingSecret: jenkins-admin-creds
+    existingSecret: jenkins-creds
 
   # -- Email address for the administrator of the Jenkins instance
   jenkinsAdminEmail:
@@ -128,8 +137,8 @@ controller:
       cpu: "50m"
       memory: "256Mi"
     limits:
-      cpu: "2000m"
-      memory: "4096Mi"
+      cpu: "1000m"
+      memory: "2048Mi"
 
   # Share process namespace to allow sidecar containers to interact with processes in other containers in the same pod
   shareProcessNamespace: false
@@ -515,7 +524,63 @@ controller:
     configUrls: []
     # - https://acme.org/jenkins.yaml
     # -- List of Jenkins Config as Code scripts
-    configScripts: {}
+    configScripts:
+      credentials-config: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - usernamePassword:
+                      id: "git-creds"
+                      username: "${github-username}"
+                      password: "${github-password}"
+                      description: "GitHub credentials"
+                  - usernamePassword:
+                      id: "harbor-creds"
+                      username: "${harbor-username}"
+                      password: "${harbor-password}"
+                      description: "Harbor credentials"
+
+      deploy-pipeline-job: |
+        jobs:
+          - script: >
+            pipelineJob('deploy-pipeline') {
+              definition {
+                cps {
+                  script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
+                  sandbox(true)
+                }
+              }
+              triggers {
+                scm('* * * * *')
+              }
+            }
+
+      deploy-kafka-konsumer: |
+        jobs:
+          - script: >
+              pipelineJob('deploy-kafka-konsumer') {
+                definition {
+                  cps {
+                    script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
+                    sandbox(true)
+                  }
+                }
+                parameters {
+                  stringParam('REPO_URL', 'https://github.com/gorbachoff33/kafka-konsumer.git')
+                  stringParam('BRANCH', 'develop')
+                  stringParam('IMAGE_NAME', 'harbor.8761.online-vds.ru/kafka-konsumer')
+                  stringParam('CHART_REPO', 'https://github.com/gorbachoff33/argocd.git')
+                  stringParam('CHART_PATH', 'apps/kafka-konsumer/values.yaml')
+                }
+                triggers {
+                  scm {
+                    scmpoll_spec('H/2 * * * *')
+                  }
+                }
+              }
+
+
     #  welcome-message: |
     #    jenkins:
     #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.

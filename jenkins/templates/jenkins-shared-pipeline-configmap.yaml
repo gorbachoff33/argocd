@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-shared-pipeline
+  namespace: jenkins
+data:
+  deploy-pipeline.groovy: |
+    pipeline {
+      agent any
+      parameters {
+        string(name: 'REPO_URL', description: 'Git репозиторий с кодом')
+        string(name: 'BRANCH', defaultValue: 'develop', description: 'Ветка Git')
+        string(name: 'IMAGE_NAME', description: 'Имя Docker-образа (включая registry)')
+        string(name: 'CHART_REPO', description: 'Репозиторий Helm chart-ов')
+        string(name: 'CHART_PATH', description: 'Путь до values.yaml внутри чарта')
+      }
+      environment {
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        REGISTRY_CREDENTIALS = 'harbor-creds'
+        GIT_CREDENTIALS = 'git-creds'
+      }
+      stages {
+        stage('Клонируем проект') {
+          steps {
+            git branch: "${params.BRANCH}",
+                credentialsId: "${env.GIT_CREDENTIALS}",
+                url: "${params.REPO_URL}"
+          }
+        }
+        stage('Собираем Docker образ') {
+          steps {
+            sh "docker build -t ${params.IMAGE_NAME}:${IMAGE_TAG} ."
+          }
+        }
+        stage('Пушим образ') {
+          steps {
+            withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
+                                               usernameVariable: 'REGISTRY_USER',
+                                               passwordVariable: 'REGISTRY_PASS')]) {
+              sh "docker login ${params.IMAGE_NAME.split('/')[0]} -u $REGISTRY_USER -p $REGISTRY_PASS"
+              sh "docker push ${params.IMAGE_NAME}:${IMAGE_TAG}"
+            }
+          }
+        }
+        stage('Обновляем Helm чарт') {
+          steps {
+            dir('chart') {
+              git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
+              sh """
+                sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
+                git add ${params.CHART_PATH}
+                git commit -m "Обновлен tag до ${IMAGE_TAG}"
+                git push
+              """
+            }
+          }
+        }
+      }
+    }
