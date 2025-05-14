@@ -13,3 +13,8 @@ spec:
         protocol: HTTP
       hosts:
         - {{ .Values.global.hostname | quote }}
+    - name: http-harbor
+      port: 32001
+      targetPort: 8080
+      protocol: TCP
+      nodePort: 32001

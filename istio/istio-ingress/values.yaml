@@ -28,6 +28,11 @@ _internal_defaults_do_not_set:
         targetPort: 8443
         name: https
         protocol: TCP
+      - port: 32001
+        targetPort: 8080
+        nodePort: 32001
+        name: harbor-http
+        protocol: TCP
 
       # Scalability tuning
       # replicaCount: 1
