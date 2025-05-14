@@ -285,7 +285,7 @@ nginx:
     enabled: false
     existingSecret: ""
     commonName: core.harbor.domain
-  behindReverseProxy: true
+  behindReverseProxy: false
   command: []
   args: []
   extraEnvVars: []
