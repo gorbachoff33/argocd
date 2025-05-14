@@ -40,7 +40,7 @@ ipFamily:
     enabled: true
   ipv4:
     enabled: true
-exposureType: nodePort
+exposureType: proxy
 service:
   type: NodePort
   ports:
