@@ -502,6 +502,7 @@ portal:
     ingressNSMatchLabels: {}
     ingressNSPodMatchLabels: {}
 core:
+  existingEnvVarsSecret: "harbor-admin-env"
   image:
     registry: docker.io
     repository: bitnami/harbor-core
@@ -518,7 +519,7 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
     existingSecret: ""
