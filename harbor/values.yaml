@@ -527,19 +527,7 @@ core:
   extraEnvVars: []
   extraEnvVarsCM: ""
   extraEnvVarsSecret: ""
-  configOverwriteJson: |
-    {
-      "project_creation_restriction": "everyone",
-      "self_registration": false,
-      "token_expiration": 30,
-      "robot_token_duration": 43200,
-      "read_only": false,
-      "cache": {
-        "enabled": true,
-        "expire_hours": 6,
-        "type": "redis"
-      }
-    }
+  configOverwriteJson: {}
   configOverwriteJsonSecret: ""
   containerPorts:
     http: 8080
