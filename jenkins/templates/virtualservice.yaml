@@ -7,7 +7,7 @@ spec:
   hosts:
     - {{ .Values.global.hostname | quote }}
   gateways:
-    - istio-gateway
+    - jenkins-gateway
   http:
     - match:
         - uri:
