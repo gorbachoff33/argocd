@@ -651,7 +651,7 @@ jobservice:
   jobLogger: file
   secret: ""
   existingSecret: ""
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   tls:
     existingSecret: ""
   command: []
@@ -979,7 +979,7 @@ trivy:
   severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
   ignoreUnfixed: false
   insecure: false
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   gitHubToken: ""
   skipUpdate: false
   skipJavaDbUpdate: false
