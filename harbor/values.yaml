@@ -535,7 +535,6 @@ core:
       "token_expiration": 30,
       "robot_token_duration": 43200,
       "read_only": false,
-      "automatically_create_project": true
     }
   configOverwriteJsonSecret: ""
   containerPorts:
