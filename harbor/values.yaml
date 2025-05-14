@@ -534,7 +534,7 @@ core:
       "self_registration": false,
       "token_expiration": 30,
       "robot_token_duration": 43200,
-      "read_only": false,
+      "read_only": false
     }
   configOverwriteJsonSecret: ""
   containerPorts:
