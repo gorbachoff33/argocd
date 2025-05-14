@@ -519,7 +519,6 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
-  existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
     existingSecret: ""
