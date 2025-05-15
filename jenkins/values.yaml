@@ -47,7 +47,7 @@ controller:
 
   additionalMounts:
     - name: shared-pipeline
-      mountPath: /var/jenkins_shared
+      mountPath: /home/jenkins/agent/workspace/seed/jobs
       readOnly: true
   # -- Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
