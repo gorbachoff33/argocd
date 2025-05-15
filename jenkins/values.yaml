@@ -507,7 +507,7 @@ controller:
   # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
   JCasC:
     # -- Enables default Jenkins configuration via configuration as code plugin
-    defaultConfig: true
+    defaultConfig: false
 
     # If true, the init container deletes all the plugin config files and Jenkins Config as Code overwrites any existing configuration
     # -- Whether Jenkins Config as Code should overwrite any existing configuration
@@ -909,7 +909,7 @@ agent:
   # -- Enable Kubernetes plugin jnlp-agent podTemplate
   enabled: true
   # -- The name of the pod template to use for providing default values
-  defaultsProviderTemplate: "default"
+  defaultsProviderTemplate: ""
 
   # For connecting to the Jenkins controller
   # -- Overrides the Kubernetes Jenkins URL
@@ -1158,23 +1158,7 @@ agent:
   # controller.JCasC.defaultConfig: true
   # Best reference is https://<jenkins_url>/configuration-as-code/reference#Cloud-kubernetes. The example below creates a python pod template.
   # -- Configures extra pod templates for the default kubernetes cloud
-  podTemplates:
-    default: |
-      - name: default
-        label: jenkins-jenkins-agent
-        containers:
-          - name: jnlp
-            image: jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3
-            args: \$(JENKINS_SECRET) \$(JENKINS_NAME)
-            resourceRequestCpu: "512m"
-            resourceRequestMemory: "512Mi"
-            resourceLimitCpu: "512m"
-            resourceLimitMemory: "512Mi"
-          - name: buildah
-            image: quay.io/buildah/stable:latest
-            command: ["cat"]
-            ttyEnabled: true
-            privileged: true
+  podTemplates: {}
   #  python: |
   #    - name: python
   #      label: jenkins-python
