@@ -79,15 +79,3 @@ data:
         }
       }
     }
-
-  seed-job.groovy: |
-    job('seed') {
-      description('Seed job для генерации всех pipeline job\'ов')
-      steps {
-        dsl {
-          external('*.groovy')
-          removeAction('DELETE')
-          ignoreExisting(false)
-        }
-      }
-    }

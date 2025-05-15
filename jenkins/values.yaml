@@ -40,15 +40,6 @@ credentialsId:
 renderHelmLabels: true
 
 controller:
-  additionalVolumes:
-    - name: shared-pipeline
-      configMap:
-        name: jenkins-shared-pipeline
-
-  additionalMounts:
-    - name: shared-pipeline
-      mountPath: /home/jenkins/agent/workspace/seed/jobs
-      readOnly: true
   # -- Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
   image:
@@ -1021,7 +1012,10 @@ agent:
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes
   # -- Additional volumes
-  volumes: []
+  volumes:
+    - type: ConfigMap
+      configMapName: jenkins-shared-pipeline
+      mountPath: /home/jenkins/agent/jobs
   # - type: ConfigMap
   #   configMapName: myconfigmap
   #   mountPath: /var/myapp/myconfigmap
