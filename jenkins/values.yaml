@@ -517,8 +517,20 @@ controller:
     # - https://acme.org/jenkins.yaml
     # -- List of Jenkins Config as Code scripts
     configScripts:
-      agent-volume-config: |
+      main-config: |
         jenkins:
+          systemMessage: "Jenkins configured as code"
+          securityRealm:
+            local:
+              allowsSignup: false
+              enableCaptcha: false
+              users:
+                - id: "${chart-admin-username}"
+                  name: "Jenkins Admin"
+                  password: "${chart-admin-password}"
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
           clouds:
             - kubernetes:
                 name: "kubernetes"
@@ -530,13 +542,10 @@ controller:
                         image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
                         args: "${computer.jnlpmac} ${computer.name}"
                         workingDir: "/home/jenkins/agent"
-                        ttyEnabled: false
                     volumes:
                       - configMapVolume:
                           configMapName: jenkins-shared-pipeline
                           mountPath: /home/jenkins/agent/jobs
-                          
-      credentials-config: |
         credentials:
           system:
             domainCredentials:
@@ -551,15 +560,13 @@ controller:
                       username: "${harbor-username}"
                       password: "${harbor-password}"
                       description: "Harbor credentials"
-
-      seed-job: |
         jobs:
           - script: >
               job('seed') {
                 description('Seed job для генерации pipeline job\'ов')
                 steps {
                   dsl {
-                    external('jobs/*.groovy')
+                    external('/home/jenkins/agent/jobs/*.groovy')
                     removeAction('DELETE')
                     ignoreExisting(false)
                   }
