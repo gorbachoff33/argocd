@@ -1206,7 +1206,7 @@ exporter:
 postgresql:
   enabled: true
   auth:
-    enablePostgresUser: true
+    enablePostgresUser: false
     postgresPassword: pizpotli88
     existingSecret: ""
   architecture: standalone
