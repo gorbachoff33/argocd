@@ -38,6 +38,7 @@ data:
                   buildah bud -t ${params.IMAGE_NAME}:${IMAGE_TAG} .
                   echo "\$REGISTRY_PASS" | buildah login -u \$REGISTRY_USER --password-stdin ${params.IMAGE_NAME.split('/')[0]}
                   buildah push ${params.IMAGE_NAME}:${IMAGE_TAG}
+                  buildah rmi ${params.IMAGE_NAME}:${IMAGE_TAG} || true
                 """
               }
             }
