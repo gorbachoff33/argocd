@@ -526,7 +526,7 @@ core:
   args: []
   extraEnvVars: []
   extraEnvVarsCM: ""
-  extraEnvVarsSecret: ""
+  extraEnvVarsSecret: "harbor-admin-env"
   configOverwriteJson: |
     {
       "project_creation_restriction": "everyone",
@@ -1207,7 +1207,7 @@ postgresql:
   enabled: true
   auth:
     enablePostgresUser: false
-    postgresPassword: pizpotli88
+    postgresPassword: not-secure-database-password
     existingSecret: ""
   architecture: standalone
   primary:
