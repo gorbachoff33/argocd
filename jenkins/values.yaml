@@ -544,17 +544,17 @@ controller:
       deploy-pipeline-job: |
         jobs:
           - script: >
-            pipelineJob('deploy-pipeline') {
-              definition {
-                cps {
-                  script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
-                  sandbox(true)
+              pipelineJob('deploy-pipeline') {
+                definition {
+                  cps {
+                    script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
+                    sandbox(true)
+                  }
+                }
+                triggers {
+                  scm('* * * * *')
                 }
               }
-              triggers {
-                scm('* * * * *')
-              }
-            }
 
       deploy-kafka-konsumer: |
         jobs:
