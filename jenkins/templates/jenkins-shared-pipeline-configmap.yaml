@@ -58,7 +58,7 @@ data:
       }
     }
 
-  project_java.groovy: |
+  java_project.groovy: |
     pipelineJob('project-java') {
       definition {
         cps {
