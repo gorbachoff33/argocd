@@ -1122,15 +1122,7 @@ agent:
 
   # Containers specified here are added to all agents. Set key empty to remove container from additional agents.
   # -- Add additional containers to the agents
-  additionalContainers:
-    - name: buildah
-      image:
-        repository: quay.io/buildah/stable
-        tag: latest
-      command: ["cat"]
-      ttyEnabled: true
-      securityContext:
-        privileged: true
+  additionalContainers: []
   #  - sideContainerName: dind
   #    image:
   #      repository: docker
