@@ -517,7 +517,7 @@ core:
   tokenKey: ""
   tokenCert: ""
   secretName: ""
-  existingSecret: ""
+  existingSecret: "harbor-admin-env"
   existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
@@ -526,7 +526,7 @@ core:
   args: []
   extraEnvVars: []
   extraEnvVarsCM: ""
-  extraEnvVarsSecret: "harbor-admin-env"
+  extraEnvVarsSecret: ""
   configOverwriteJson: |
     {
       "project_creation_restriction": "everyone",
