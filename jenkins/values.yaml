@@ -523,6 +523,7 @@ controller:
               job('seed') {
                 description('Seed job to create all pipeline jobs')
                 steps {
+                  shell('mkdir -p jobs && cp /var/jenkins_shared/myjob/*.groovy jobs/')
                   dsl {
                     external('jobs/*.groovy')
                     removeAction('DELETE')
@@ -999,7 +1000,7 @@ agent:
   volumes:
     - type: ConfigMap
       configMapName: jenkins-shared-pipeline
-      mountPath: /var/jenkins_shared
+      mountPath: /var/jenkins_shared/myjob
   
   # - type: ConfigMap
   #   configMapName: myconfigmap
