@@ -518,7 +518,7 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
     existingSecret: ""
@@ -651,7 +651,7 @@ jobservice:
   jobLogger: file
   secret: ""
   existingSecret: ""
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   tls:
     existingSecret: ""
   command: []
@@ -979,7 +979,7 @@ trivy:
   severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
   ignoreUnfixed: false
   insecure: false
-  existingEnvVarsSecret: "harbor-admin-env"
+  existingEnvVarsSecret: ""
   gitHubToken: ""
   skipUpdate: false
   skipJavaDbUpdate: false
@@ -1207,7 +1207,7 @@ postgresql:
   enabled: true
   auth:
     enablePostgresUser: true
-    postgresPassword: not-secure-database-password
+    postgresPassword: pizpotli88
     existingSecret: ""
   architecture: standalone
   primary:
