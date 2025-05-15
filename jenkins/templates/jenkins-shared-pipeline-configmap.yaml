@@ -58,7 +58,7 @@ data:
       }
     }
 
-  jobs/project-java.groovy: |
+  project-java.groovy: |
     pipelineJob('project-java') {
       definition {
         cps {
@@ -85,7 +85,7 @@ data:
       description('Seed job для генерации всех pipeline job\'ов')
       steps {
         dsl {
-          external('jobs/*.groovy')
+          external('*.groovy')
           removeAction('DELETE')
           ignoreExisting(false)
         }
