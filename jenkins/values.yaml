@@ -523,9 +523,8 @@ controller:
               job('seed') {
                 description('Seed job to create all pipeline jobs')
                 steps {
-                  shell('mkdir -p jobs && cp /var/jenkins_shared/*.groovy jobs/')
                   dsl {
-                    external('jobs/*.groovy')
+                    script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
                     removeAction('DELETE')
                     ignoreExisting(false)
                   }
