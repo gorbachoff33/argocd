@@ -1,3 +1,4 @@
+harborAdminPassword: "pizpotli88"
 global:
   imageRegistry: ""
   imagePullSecrets: []
@@ -517,7 +518,7 @@ core:
   tokenKey: ""
   tokenCert: ""
   secretName: ""
-  existingSecret: "harbor-admin-env"
+  existingSecret: ""
   existingEnvVarsSecret: ""
   csrfKey: ""
   tls:
