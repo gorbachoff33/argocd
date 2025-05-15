@@ -1000,6 +1000,7 @@ agent:
     - type: ConfigMap
       configMapName: jenkins-shared-pipeline
       mountPath: /home/jenkins/agent/workspace/jobs
+      readOnly: true
   
   # - type: ConfigMap
   #   configMapName: myconfigmap
@@ -1035,7 +1036,8 @@ agent:
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes/workspace
   # -- Workspace volume (defaults to EmptyDir)
-  workspaceVolume: {}
+  workspaceVolume:
+    type: EmptyDir
   ## DynamicPVC example
   # - type: DynamicPVC
   #   configMapName: myconfigmap
