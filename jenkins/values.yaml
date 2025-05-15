@@ -413,6 +413,7 @@ controller:
   # Plugins will be installed during Jenkins controller start
   # -- List of Jenkins plugins to install. If you don't want to install plugins, set it to `false`
   installPlugins:
+    - job-dsl:latest
     - kubernetes:4214.vf10083a_42e70
     - workflow-aggregator:596.v8c21c963d92d
     - git:5.2.2
@@ -541,43 +542,16 @@ controller:
                       password: "${harbor-password}"
                       description: "Harbor credentials"
 
-      deploy-pipeline-job: |
-        jobs:
-          - script: |
-              <<-EOF
-              pipelineJob('deploy-pipeline') {
-                  definition {
-                      cps {
-                          script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
-                          sandbox(true)
-                      }
-                  }
-                  triggers {
-                      scm('* * * * *')
-                  }
-              }
-              EOF
-
-      deploy-kafka-konsumer: |
+      seed-job: |
         jobs:
           - script: >
-              pipelineJob('deploy-kafka-konsumer') {
-                definition {
-                  cps {
-                    script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
-                    sandbox(true)
-                  }
-                }
-                parameters {
-                  stringParam('REPO_URL', 'https://github.com/gorbachoff33/kafka-konsumer.git')
-                  stringParam('BRANCH', 'develop')
-                  stringParam('IMAGE_NAME', 'harbor.8761.online-vds.ru/kafka-konsumer')
-                  stringParam('CHART_REPO', 'https://github.com/gorbachoff33/argocd.git')
-                  stringParam('CHART_PATH', 'apps/kafka-konsumer/values.yaml')
-                }
-                triggers {
-                  scm {
-                    scmpoll_spec('H/2 * * * *')
+              job('seed') {
+                description('Seed job для генерации pipeline job\'ов')
+                steps {
+                  dsl {
+                    external('jobs/*.groovy')
+                    removeAction('DELETE')
+                    ignoreExisting(false)
                   }
                 }
               }
