@@ -1157,7 +1157,7 @@ agent:
         containers:
           - name: jnlp
             image: jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3
-            args: "\$(JENKINS_SECRET) \$(JENKINS_NAME)"
+            args: '$(JENKINS_SECRET) $(JENKINS_NAME)'
           - name: buildah
             image: quay.io/buildah/stable:latest
             command: ["cat"]
