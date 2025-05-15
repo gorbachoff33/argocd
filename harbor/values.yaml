@@ -518,7 +518,7 @@ core:
   tokenCert: ""
   secretName: ""
   existingSecret: ""
-  existingEnvVarsSecret: ""
+  existingEnvVarsSecret: "harbor-admin-env"
   csrfKey: ""
   tls:
     existingSecret: ""
