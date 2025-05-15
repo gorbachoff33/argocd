@@ -521,8 +521,9 @@ controller:
         jobs:
           - script: >
               job('seed') {
-                description('Seed job для генерации pipeline job\'ов')
+                description('Seed job to create all pipeline jobs')
                 steps {
+                  shell('mkdir -p jobs && cp /var/jenkins_shared/*.groovy jobs/')
                   dsl {
                     external('jobs/*.groovy')
                     removeAction('DELETE')
@@ -999,7 +1000,7 @@ agent:
   volumes:
     - type: ConfigMap
       configMapName: jenkins-shared-pipeline
-      mountPath: /home/jenkins/agent/workspace/jobs
+      mountPath: /var/jenkins_shared
   
   # - type: ConfigMap
   #   configMapName: myconfigmap
@@ -1035,8 +1036,7 @@ agent:
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes/workspace
   # -- Workspace volume (defaults to EmptyDir)
-  workspaceVolume:
-    emptyDirWorkspaceVolume: {}
+  workspaceVolume: {}
   ## DynamicPVC example
   # - type: DynamicPVC
   #   configMapName: myconfigmap
