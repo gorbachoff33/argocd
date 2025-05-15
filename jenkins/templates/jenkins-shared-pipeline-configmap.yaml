@@ -75,7 +75,7 @@ data:
       }
       triggers {
         scm {
-          scmpoll_spec('H/2 * * * *')
+          scmpoll_spec('H/1 * * * *')
         }
       }
     }

@@ -1000,7 +1000,6 @@ agent:
     - type: ConfigMap
       configMapName: jenkins-shared-pipeline
       mountPath: /home/jenkins/agent/workspace/jobs
-      readOnly: true
   
   # - type: ConfigMap
   #   configMapName: myconfigmap
