@@ -1152,17 +1152,22 @@ agent:
   # -- Configures extra pod templates for the default kubernetes cloud
   podTemplates:
     buildah-template: |
-      name: buildah-template
-      label: jenkins-jenkins-agent
-      containers:
-        - name: jnlp
-          image: jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3
-          args: \$(JENKINS_SECRET) \$(JENKINS_NAME)
-        - name: buildah
-          image: quay.io/buildah/stable:latest
-          command: ["cat"]
-          ttyEnabled: true
-          privileged: true
+      - name: buildah-template
+        label: jenkins-jenkins-agent
+        serviceAccount: default
+        containers:
+          - name: jnlp
+            image: jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3
+            args: \$(JENKINS_SECRET) \$(JENKINS_NAME)
+            resourceRequestCpu: "512m"
+            resourceRequestMemory: "512Mi"
+            resourceLimitCpu: "512m"
+            resourceLimitMemory: "512Mi"
+          - name: buildah
+            image: quay.io/buildah/stable:latest
+            command: ["cat"]
+            ttyEnabled: true
+            privileged: true
 additionalAgents: {}
 #  maven:
 #    podName: maven
