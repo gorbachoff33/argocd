@@ -62,8 +62,8 @@ data:
     pipelineJob('project-java') {
       definition {
         cps {
-          script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
-          sandbox(true)
+          script(readFileFromWorkspace('shared/deploy-pipeline.groovy'))
+          sandbox(false)
         }
       }
       parameters {
