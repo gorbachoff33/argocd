@@ -529,9 +529,7 @@ controller:
                     containers:
                       - name: jnlp
                         image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
-                        args: 
-                          - "sleep"
-                          - "3600"
+                        args: "sleep 3600"
                         workingDir: /home/jenkins/agent
                     volumes:
                       - configMapVolume:
