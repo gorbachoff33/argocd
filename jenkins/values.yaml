@@ -566,7 +566,7 @@ controller:
                 description('Seed job для генерации pipeline job\'ов')
                 steps {
                   dsl {
-                    external('/home/jenkins/agent/jobs/*.groovy')
+                    external('jobs/*.groovy')
                     removeAction('DELETE')
                     ignoreExisting(false)
                   }
