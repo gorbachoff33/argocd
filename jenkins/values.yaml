@@ -549,7 +549,7 @@ controller:
                 description('Seed job для генерации pipeline job\'ов')
                 steps {
                   dsl {
-                    external('*.groovy')
+                    external('/var/jenkins_shared/*.groovy')
                     removeAction('DELETE')
                     ignoreExisting(false)
                   }
