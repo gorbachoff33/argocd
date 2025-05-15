@@ -549,7 +549,7 @@ controller:
                 description('Seed job для генерации pipeline job\'ов')
                 steps {
                   dsl {
-                    external('jobs/*.groovy')
+                    external('*.groovy')
                     removeAction('DELETE')
                     ignoreExisting(false)
                   }
