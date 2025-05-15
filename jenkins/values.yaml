@@ -519,47 +519,22 @@ controller:
     configScripts:
       main-config: |
         jenkins:
-          systemMessage: "Jenkins configured as code"
-          securityRealm:
-            local:
-              allowsSignup: false
-              enableCaptcha: false
-              users:
-                - id: "${chart-admin-username}"
-                  name: "Jenkins Admin"
-                  password: "${chart-admin-password}"
-          authorizationStrategy:
-            loggedInUsersCanDoAnything:
-              allowAnonymousRead: false
+          systemMessage: "Jenkins as Code"
           clouds:
             - kubernetes:
                 name: "kubernetes"
                 templates:
-                  - name: "default"
-                    label: "jenkins-jenkins-agent"
+                  - name: default
+                    label: jenkins-jenkins-agent
                     containers:
                       - name: jnlp
                         image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
                         args: "${computer.jnlpmac} ${computer.name}"
-                        workingDir: "/home/jenkins/agent"
+                        workingDir: /home/jenkins/agent
                     volumes:
                       - configMapVolume:
                           configMapName: jenkins-shared-pipeline
-                          mountPath: /home/jenkins/agent/jobs
-        credentials:
-          system:
-            domainCredentials:
-              - credentials:
-                  - usernamePassword:
-                      id: "git-creds"
-                      username: "${github-username}"
-                      password: "${github-password}"
-                      description: "GitHub credentials"
-                  - usernamePassword:
-                      id: "harbor-creds"
-                      username: "${harbor-username}"
-                      password: "${harbor-password}"
-                      description: "Harbor credentials"
+                          mountPath: /home/jenkins/agent/workspace/jobs
         jobs:
           - script: >
               job('seed') {
