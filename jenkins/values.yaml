@@ -1036,7 +1036,7 @@ agent:
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes/workspace
   # -- Workspace volume (defaults to EmptyDir)
   workspaceVolume:
-    type: EmptyDir
+    emptyDirWorkspaceVolume: {}
   ## DynamicPVC example
   # - type: DynamicPVC
   #   configMapName: myconfigmap
