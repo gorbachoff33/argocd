@@ -27,36 +27,39 @@ data:
                 url: "${params.REPO_URL}"
           }
         }
-        stage('Собираем Docker образ') {
+
+        stage('Собираем и пушим образ') {
           steps {
-            sh "docker build -t ${params.IMAGE_NAME}:${IMAGE_TAG} ."
-          }
-        }
-        stage('Пушим образ') {
-          steps {
-            withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
-                                               usernameVariable: 'REGISTRY_USER',
-                                               passwordVariable: 'REGISTRY_PASS')]) {
-              sh "docker login ${params.IMAGE_NAME.split('/')[0]} -u $REGISTRY_USER -p $REGISTRY_PASS"
-              sh "docker push ${params.IMAGE_NAME}:${IMAGE_TAG}"
+            container('buildah') {
+              withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
+                                                usernameVariable: 'REGISTRY_USER',
+                                                passwordVariable: 'REGISTRY_PASS')]) {
+                sh """
+                  buildah bud -t ${params.IMAGE_NAME}:${IMAGE_TAG} .
+                  echo "\$REGISTRY_PASS" | buildah login -u \$REGISTRY_USER --password-stdin ${params.IMAGE_NAME.split('/')[0]}
+                  buildah push ${params.IMAGE_NAME}:${IMAGE_TAG}
+                """
+              }
             }
           }
         }
+
         stage('Обновляем Helm чарт') {
           steps {
             dir('chart') {
               git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
-              sh '''
+              sh """
                 sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
                 git add ${params.CHART_PATH}
                 git commit -m "Обновлен tag до ${IMAGE_TAG}"
                 git push
-              '''
+              """
             }
           }
         }
       }
     }
+
 
   java_project.groovy: |
     pipelineJob('project-java') {
