@@ -1,4 +1,3 @@
-harborAdminPassword: "pizpotli88"
 global:
   imageRegistry: ""
   imagePullSecrets: []
@@ -22,7 +21,7 @@ diagnosticMode:
     - sleep
   args:
     - infinity
-adminPassword: ""
+adminPassword: "pizpotli88"
 externalURL: http://8761.online-vds.ru:32001
 proxy:
   httpProxy: ""
@@ -1207,7 +1206,7 @@ exporter:
 postgresql:
   enabled: true
   auth:
-    enablePostgresUser: false
+    enablePostgresUser: true
     postgresPassword: not-secure-database-password
     existingSecret: ""
   architecture: standalone
