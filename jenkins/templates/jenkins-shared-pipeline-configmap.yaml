@@ -70,6 +70,7 @@ data:
           sandbox(false)
         }
       }
+      label('jenkins-jenkins-agent')
       parameters {
         stringParam('REPO_URL', 'https://github.com/gorbachoff33/database-service.git')
         stringParam('BRANCH', 'develop')
