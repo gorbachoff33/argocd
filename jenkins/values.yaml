@@ -909,7 +909,7 @@ agent:
   # -- Enable Kubernetes plugin jnlp-agent podTemplate
   enabled: true
   # -- The name of the pod template to use for providing default values
-  defaultsProviderTemplate: ""
+  defaultsProviderTemplate: "default"
 
   # For connecting to the Jenkins controller
   # -- Overrides the Kubernetes Jenkins URL
