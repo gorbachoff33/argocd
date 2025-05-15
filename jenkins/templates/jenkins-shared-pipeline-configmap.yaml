@@ -46,14 +46,48 @@ data:
           steps {
             dir('chart') {
               git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
-              sh """
+              sh '''
                 sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
                 git add ${params.CHART_PATH}
                 git commit -m "Обновлен tag до ${IMAGE_TAG}"
                 git push
-              """
+              '''
             }
           }
+        }
+      }
+    }
+
+  jobs/project-java.groovy: |
+    pipelineJob('project-java') {
+      definition {
+        cps {
+          script(readFileFromWorkspace('/var/jenkins_shared/deploy-pipeline.groovy'))
+          sandbox(true)
+        }
+      }
+      parameters {
+        stringParam('REPO_URL', 'https://github.com/gorbachoff33/database-service.git')
+        stringParam('BRANCH', 'develop')
+        stringParam('IMAGE_NAME', '8761.online-vds.ru:32001/db-service')
+        stringParam('CHART_REPO', 'https://github.com/gorbachoff33/argocd.git')
+        stringParam('CHART_PATH', 'db-service/values.yaml')
+      }
+      triggers {
+        scm {
+          scmpoll_spec('H/2 * * * *')
+        }
+      }
+    }
+
+  seed-job.groovy: |
+    job('seed') {
+      description('Seed job для генерации всех pipeline job\'ов')
+      steps {
+        dsl {
+          external('jobs/*.groovy')
+          removeAction('DELETE')
+          ignoreExisting(false)
         }
       }
     }
