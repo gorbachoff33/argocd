@@ -523,18 +523,32 @@ controller:
           clouds:
             - kubernetes:
                 name: "kubernetes"
+                containerCap: 10
+                jenkinsTunnel: "jenkins-agent.jenkins.svc.cluster.local:50000"
+                jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080/jenkins"
+                namespace: "jenkins"
+                serverUrl: "https://kubernetes.default"
+                podLabels:
+                  - key: "jenkins/jenkins-jenkins-agent"
+                    value: "true"
                 templates:
                   - name: default
                     label: jenkins-jenkins-agent
+                    serviceAccount: default
                     containers:
                       - name: jnlp
                         image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
-                        args: "sleep 3600"
-                        workingDir: /home/jenkins/agent
+                        args: "${computer.jnlpmac} ${computer.name}"
+                        workingDir: "/home/jenkins/agent"
+                        resourceLimitCpu: "512m"
+                        resourceLimitMemory: "512Mi"
+                        resourceRequestCpu: "512m"
+                        resourceRequestMemory: "512Mi"
                     volumes:
                       - configMapVolume:
-                          configMapName: jenkins-shared-pipeline
-                          mountPath: /home/jenkins/agent/workspace/jobs
+                          configMapName: "jenkins-shared-pipeline"
+                          mountPath: "/home/jenkins/agent/workspace/jobs"
+
         jobs:
           - script: >
               job('seed') {
