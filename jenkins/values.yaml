@@ -553,7 +553,7 @@ controller:
                         image: "quay.io/buildah/stable:latest"
                         command: "cat"
                         ttyEnabled: true
-                        
+                        privileged: true
 
 
     #  welcome-message: |
