@@ -90,7 +90,7 @@ data:
         string(name: 'CHART_PATH', defaultValue: 'db-service/values.yaml', description: '')
       }
       triggers {
-        scm('H/2 * * * *')
+        pollSCM('H/2 * * * *')
       }
       stages {
         stage('Клонируем проект') {
