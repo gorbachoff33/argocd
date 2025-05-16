@@ -547,7 +547,9 @@ controller:
                         args: "${computer.jnlpmac} ${computer.name}"
                       - name: buildah
                         image: "quay.io/buildah/stable:latest"
-                        
+                        command:
+                          - cat
+                  
 
     #  welcome-message: |
     #    jenkins:
