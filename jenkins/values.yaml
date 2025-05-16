@@ -542,7 +542,8 @@ controller:
                   - name: "buildah-template"
                     label: "buildah-template"
                     containers:
-                      
+                      - name: jnlp
+                        
 
     #  welcome-message: |
     #    jenkins:
