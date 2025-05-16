@@ -75,73 +75,18 @@ data:
     pipelineJob('project-java') {
       definition {
         cps {
-          script('''
-    pipeline {
-      agent {
-        kubernetes {
-          inheritFrom 'buildah-template'
+          script(readFileFromWorkspace('shared/deploy-pipeline.groovy'))
+          sandbox(false)
         }
       }
-      environment {
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        REGISTRY_CREDENTIALS = 'harbor-creds'
-        GIT_CREDENTIALS = 'git-creds'
-      }
       parameters {
-        string(name: 'REPO_URL', defaultValue: 'https://github.com/gorbachoff33/database-service.git', description: '')
-        string(name: 'BRANCH', defaultValue: 'develop', description: '')
-        string(name: 'IMAGE_NAME', defaultValue: '8761.online-vds.ru:32001/db-service', description: '')
-        string(name: 'CHART_REPO', defaultValue: 'https://github.com/gorbachoff33/argocd.git', description: '')
-        string(name: 'CHART_PATH', defaultValue: 'db-service/values.yaml', description: '')
+        stringParam('REPO_URL', 'https://github.com/gorbachoff33/database-service.git')
+        stringParam('BRANCH', 'develop')
+        stringParam('IMAGE_NAME', '8761.online-vds.ru:32001/db-service')
+        stringParam('CHART_REPO', 'https://github.com/gorbachoff33/argocd.git')
+        stringParam('CHART_PATH', 'db-service/values.yaml')
       }
       triggers {
         pollSCM('H/2 * * * *')
       }
-      stages {
-        stage('Клонируем проект') {
-          steps {
-            git(
-              branch: params.BRANCH,
-              credentialsId: 'git-creds',
-              url: params.REPO_URL
-            )
-          }
-        }
-        stage('Собираем и пушим образ') {
-          steps {
-            container('buildah') {
-              withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
-                                                usernameVariable: 'REGISTRY_USER',
-                                                passwordVariable: 'REGISTRY_PASS')]) {
-                sh """
-                  buildah bud -t ${params.IMAGE_NAME}:${IMAGE_TAG} .
-                  echo "\$REGISTRY_PASS" | buildah login -u \$REGISTRY_USER --password-stdin ${params.IMAGE_NAME.split('/')[0]}
-                  buildah push ${params.IMAGE_NAME}:${IMAGE_TAG}
-                  buildah rmi ${params.IMAGE_NAME}:${IMAGE_TAG} || true
-                """
-              }
-            }
-          }
-        }
-
-        stage('Обновляем Helm чарт') {
-          steps {
-            dir('chart') {
-              git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
-              sh """
-                sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
-                git add ${params.CHART_PATH}
-                git commit -m "Обновлен tag до ${IMAGE_TAG}"
-                git push
-              """
-            }
-          }
-        }
-      }
     }
-    ''')
-          sandbox(false)
-        }
-      }
-    }
-
