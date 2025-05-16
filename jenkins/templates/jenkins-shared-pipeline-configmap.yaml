@@ -87,6 +87,6 @@ data:
         stringParam('CHART_PATH', 'db-service/values.yaml')
       }
       triggers {
-        pollSCM('H/2 * * * *')
+        scm('H/2 * * * *')
       }
     }
