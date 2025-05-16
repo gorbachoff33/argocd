@@ -533,7 +533,7 @@ controller:
                 }
               }
 
-      buildahpodtemplates: |
+      mytemp: |
         jenkins:
           clouds:
             - kubernetes:
