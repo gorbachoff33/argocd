@@ -95,12 +95,13 @@ data:
       stages {
         stage('Клонируем проект') {
           steps {
-            git branch: "${params.BRANCH}",
-                credentialsId: "${env.GIT_CREDENTIALS}",
-                url: "${params.REPO_URL}"
+            git(
+              branch: params.BRANCH,
+              credentialsId: 'git-creds',
+              url: params.REPO_URL
+            )
           }
         }
-
         stage('Собираем и пушим образ') {
           steps {
             container('buildah') {
