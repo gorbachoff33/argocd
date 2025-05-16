@@ -69,7 +69,7 @@ controller:
   disableRememberMe: false
 
   # -- Set Number of executors
-  numExecutors: 1
+  numExecutors: 0
 
   # -- Sets the executor mode of the Jenkins node. Possible values are "NORMAL" or "EXCLUSIVE"
   executorMode: "NORMAL"
@@ -535,6 +535,7 @@ controller:
 
       buildahpodtemplates: |
         jenkins:
+          numExecutors: 1
           clouds:
             - kubernetes:
                 name: "kubernetes"
