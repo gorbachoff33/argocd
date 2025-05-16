@@ -39,17 +39,15 @@ data:
             container('buildah') {
               script {
                 def registryHost = params.IMAGE_NAME.split('/')[0]
-                withEnv([
-                  'REGISTRY_USER=${harbor-core-envvars-REGISTRY_CREDENTIAL_USERNAME}',
-                  'REGISTRY_PASS=${harbor-core-envvars-REGISTRY_CREDENTIAL_PASSWORD}'
-                ]) {
-                  sh '''
-                    buildah bud -t ${IMAGE_NAME}:${BUILD_NUMBER} .
-                    echo "$REGISTRY_PASS" | buildah login -u "$REGISTRY_USER" --password-stdin ${IMAGE_NAME%%/*}
-                    buildah push ${IMAGE_NAME}:${BUILD_NUMBER}
-                    buildah rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
-                  '''
-                }
+                def registryUser = 'admin'
+                def registryPass = 'pizpotli88'
+
+                sh """
+                  buildah bud -t ${params.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                  echo '${registryPass}' | buildah login -u '${registryUser}' --password-stdin ${registryHost}
+                  buildah push ${params.IMAGE_NAME}:${env.BUILD_NUMBER}
+                  buildah rmi ${params.IMAGE_NAME}:${env.BUILD_NUMBER} || true
+                """
               }
             }
           }
@@ -70,6 +68,8 @@ data:
         }
       }
     }
+
+
 
   java_project.groovy: |
     pipelineJob('project-java') {
