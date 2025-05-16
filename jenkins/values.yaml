@@ -538,18 +538,26 @@ controller:
           clouds:
             - kubernetes:
                 name: "kubernetes"
+                namespace: "jenkins"
                 templates:
                   - name: "buildah-template"
                     label: "buildah-template"
+                    serviceAccount: "default"
                     containers:
                       - name: jnlp
                         image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
                         args: "${computer.jnlpmac} ${computer.name}"
+                        ttyEnabled: true
+                        workingDir: /home/jenkins/agent
                       - name: buildah
                         image: "quay.io/buildah/stable:latest"
                         command: "cat"
                         ttyEnabled: true
                         privileged: true
+                    podRetention: "Never"
+                    nodeSelector:
+                      kubernetes.io/os: linux
+
 
     #  welcome-message: |
     #    jenkins:
@@ -1004,7 +1012,7 @@ agent:
   restrictedPssSecurityContext: false
   # Controls how agent pods are retained after the Jenkins build completes
   # Possible values: Always, Never, OnFailure
-  podRetention: "Always"
+  podRetention: "Never"
   # Disable if you do not want the Yaml the agent pod template to show up
   # in the job Console Output. This can be helpful for either security reasons
   # or simply to clean up the output to make it easier to read.
