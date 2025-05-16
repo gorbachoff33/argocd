@@ -1159,7 +1159,7 @@ agent:
           args: "${computer.jnlpmac} ${computer.name}"
 
     - name: buildah-template
-      label: jenkins-jenkins-agent
+      label: buildah-template
       containers:
         - name: jnlp
           image: jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3
