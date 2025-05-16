@@ -533,7 +533,7 @@ controller:
                 }
               }
 
-      customPodTemplates: |
+      buildahpodtemplates: |
         jenkins:
           clouds:
             - kubernetes:
