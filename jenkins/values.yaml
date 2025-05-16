@@ -554,6 +554,8 @@ controller:
                         command: "cat"
                         ttyEnabled: true
                         privileged: true
+                    nodeSelector:
+                      kubernetes.io/os: linux
 
 
     #  welcome-message: |
