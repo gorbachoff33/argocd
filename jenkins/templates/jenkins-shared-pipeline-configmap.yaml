@@ -6,12 +6,7 @@ metadata:
 data:
   deploy-pipeline.groovy: |
     pipeline {
-      agent {
-        kubernetes {
-          inheritFrom 'buildah-template'
-        }
-      }
-
+      agent any
       parameters {
         string(name: 'REPO_URL', description: 'Git репозиторий с кодом')
         string(name: 'BRANCH', defaultValue: 'develop', description: 'Ветка Git')
@@ -19,57 +14,49 @@ data:
         string(name: 'CHART_REPO', description: 'Репозиторий Helm chart-ов')
         string(name: 'CHART_PATH', description: 'Путь до values.yaml внутри чарта')
       }
-
       environment {
         IMAGE_TAG = "${env.BUILD_NUMBER}"
+        REGISTRY_CREDENTIALS = 'harbor-creds'
         GIT_CREDENTIALS = 'git-creds'
       }
-
       stages {
         stage('Клонируем проект') {
           steps {
-            git branch: params.BRANCH,
-                credentialsId: env.GIT_CREDENTIALS,
-                url: params.REPO_URL
+            git branch: "${params.BRANCH}",
+                credentialsId: "${env.GIT_CREDENTIALS}",
+                url: "${params.REPO_URL}"
           }
         }
-
-        stage('Собираем и пушим образ') {
+        stage('Собираем Docker образ') {
           steps {
-            container('buildah') {
-              script {
-                def registryHost = params.IMAGE_NAME.split('/')[0]
-                def registryUser = 'admin'
-                def registryPass = 'pizpotli88'
-
-                sh """
-                  buildah bud -t ${params.IMAGE_NAME}:${env.BUILD_NUMBER} .
-                  echo '${registryPass}' | buildah login -u '${registryUser}' --password-stdin ${registryHost}
-                  buildah push ${params.IMAGE_NAME}:${env.BUILD_NUMBER}
-                  buildah rmi ${params.IMAGE_NAME}:${env.BUILD_NUMBER} || true
-                """
-              }
+            sh "docker build -t ${params.IMAGE_NAME}:${IMAGE_TAG} ."
+          }
+        }
+        stage('Пушим образ') {
+          steps {
+            withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
+                                               usernameVariable: 'REGISTRY_USER',
+                                               passwordVariable: 'REGISTRY_PASS')]) {
+              sh "docker login ${params.IMAGE_NAME.split('/')[0]} -u $REGISTRY_USER -p $REGISTRY_PASS"
+              sh "docker push ${params.IMAGE_NAME}:${IMAGE_TAG}"
             }
           }
         }
-
         stage('Обновляем Helm чарт') {
           steps {
             dir('chart') {
-              git credentialsId: env.GIT_CREDENTIALS, url: params.CHART_REPO
-              sh """
+              git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
+              sh '''
                 sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
                 git add ${params.CHART_PATH}
                 git commit -m "Обновлен tag до ${IMAGE_TAG}"
                 git push
-              """
+              '''
             }
           }
         }
       }
     }
-
-
 
   java_project.groovy: |
     pipelineJob('project-java') {
@@ -87,6 +74,8 @@ data:
         stringParam('CHART_PATH', 'db-service/values.yaml')
       }
       triggers {
-        scm('H/2 * * * *')
+        scm {
+          scmpoll_spec('H/1 * * * *')
+        }
       }
     }
