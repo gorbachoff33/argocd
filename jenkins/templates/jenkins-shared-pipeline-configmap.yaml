@@ -11,6 +11,7 @@ data:
           inheritFrom 'buildah-template'
         }
       }
+
       parameters {
         string(name: 'REPO_URL', description: 'Git репозиторий с кодом')
         string(name: 'BRANCH', defaultValue: 'develop', description: 'Ветка Git')
@@ -18,33 +19,37 @@ data:
         string(name: 'CHART_REPO', description: 'Репозиторий Helm chart-ов')
         string(name: 'CHART_PATH', description: 'Путь до values.yaml внутри чарта')
       }
+
       environment {
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        REGISTRY_CREDENTIALS = 'harbor-creds'
         GIT_CREDENTIALS = 'git-creds'
       }
+
       stages {
         stage('Клонируем проект') {
           steps {
-            git branch: "${params.BRANCH}",
-                credentialsId: "${env.GIT_CREDENTIALS}",
-                url: "${params.REPO_URL}"
+            git branch: params.BRANCH,
+                credentialsId: env.GIT_CREDENTIALS,
+                url: params.REPO_URL
           }
         }
 
         stage('Собираем и пушим образ') {
           steps {
             container('buildah') {
-              def registryHost = params.IMAGE_NAME.split('/')[0]
-              withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS,
-                                                usernameVariable: 'REGISTRY_USER',
-                                                passwordVariable: 'REGISTRY_PASS')]) {
-                sh """
-                buildah bud -t ${params.IMAGE_NAME}:${IMAGE_TAG} .
-                echo "\$REGISTRY_PASS" | buildah login -u \$REGISTRY_USER --password-stdin ${registryHost}
-                buildah push ${params.IMAGE_NAME}:${IMAGE_TAG}
-                buildah rmi ${params.IMAGE_NAME}:${IMAGE_TAG} || true
-              """
+              script {
+                def registryHost = params.IMAGE_NAME.split('/')[0]
+                withEnv([
+                  'REGISTRY_USER=${harbor-core-envvars-REGISTRY_CREDENTIAL_USERNAME}',
+                  'REGISTRY_PASS=${harbor-core-envvars-REGISTRY_CREDENTIAL_PASSWORD}'
+                ]) {
+                  sh '''
+                    buildah bud -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                    echo "$REGISTRY_PASS" | buildah login -u "$REGISTRY_USER" --password-stdin ${IMAGE_NAME%%/*}
+                    buildah push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    buildah rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
+                  '''
+                }
               }
             }
           }
@@ -53,7 +58,7 @@ data:
         stage('Обновляем Helm чарт') {
           steps {
             dir('chart') {
-              git credentialsId: "${env.GIT_CREDENTIALS}", url: "${params.CHART_REPO}"
+              git credentialsId: env.GIT_CREDENTIALS, url: params.CHART_REPO
               sh """
                 sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' ${params.CHART_PATH}
                 git add ${params.CHART_PATH}
@@ -65,7 +70,6 @@ data:
         }
       }
     }
-
 
   java_project.groovy: |
     pipelineJob('project-java') {

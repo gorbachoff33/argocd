@@ -468,7 +468,11 @@ controller:
   existingSecret:
 
   # -- List of additional existing secrets to mount
-  additionalExistingSecrets: []
+  additionalExistingSecrets:
+    - name: harbor-core-envvars
+      keyName: REGISTRY_CREDENTIAL_USERNAME
+    - name: harbor-core-envvars
+      keyName: REGISTRY_CREDENTIAL_PASSWORD
   # ref: https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets
   # additionalExistingSecrets:
   #  - name: secret-name-1
