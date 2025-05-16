@@ -542,17 +542,7 @@ controller:
                   - name: "buildah-template"
                     label: "buildah-template"
                     containers:
-                      - name: jnlp
-                        image: "jenkins/inbound-agent:3206.vb_15dcf73f6a_9-3"
-                        args:
-                          - "${computer.jnlpmac}"
-                          - "${computer.name}"
-                      - name: buildah
-                        image: "quay.io/buildah/stable:latest"
-                        command:
-                          - cat
-                        ttyEnabled: true
-                        privileged: true
+                      
 
     #  welcome-message: |
     #    jenkins:
