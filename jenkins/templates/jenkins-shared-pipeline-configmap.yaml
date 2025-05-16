@@ -9,7 +9,6 @@ data:
       agent {
         kubernetes {
           inheritFrom 'buildah-template'
-          label 'jenkins-jenkins-agent'
         }
       }
       parameters {
