@@ -507,7 +507,7 @@ controller:
   # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
   JCasC:
     # -- Enables default Jenkins configuration via configuration as code plugin
-    defaultConfig: true
+    defaultConfig: false
 
     # If true, the init container deletes all the plugin config files and Jenkins Config as Code overwrites any existing configuration
     # -- Whether Jenkins Config as Code should overwrite any existing configuration
