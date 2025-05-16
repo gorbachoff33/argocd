@@ -555,6 +555,10 @@ controller:
                         command: "cat"
                         ttyEnabled: true
                         privileged: true
+                    volumes:
+                      - configMapVolume:
+                          mountPath: "/var/jenkins_shared/myjob"
+                          name: "jenkins-shared-pipeline"
 
 
     #  welcome-message: |
