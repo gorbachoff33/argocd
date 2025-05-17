@@ -1,6 +1,6 @@
 image:
   repository: 8761.online-vds.ru:32001/db-service/db-service
-  tag: "1.0.6"
+  tag: "1.0.7"
   pullPolicy: Always
 
 imagePullSecrets:
