@@ -21,6 +21,8 @@ spec:
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
               value: "yes"
+            - name: ZOO_4LW_COMMANDS_WHITELIST
+              value: "ruok,srvr,stat"
           resources:
             requests:
               cpu: {{ .Values.zookeeper.resources.requests.cpu }}
@@ -33,7 +35,7 @@ spec:
               command:
                 - sh
                 - -c
-                - "echo ruok | nc 127.0.0.1 2181 | grep imok"
+                - "echo ruok | nc 127.0.0.1 {{ .Values.zookeeper.port }} | grep imok"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -44,7 +46,7 @@ spec:
               command:
                 - sh
                 - -c
-                - "echo ruok | nc 127.0.0.1 2181 | grep imok"
+                - "echo ruok | nc 127.0.0.1 {{ .Values.zookeeper.port }} | grep imok"
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
