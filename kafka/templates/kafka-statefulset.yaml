@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  serviceName: kafka
+  replicas: {{ .Values.kafka.replicas }}
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: {{ .Values.kafka.image }}
+          ports:
+            - containerPort: {{ .Values.kafka.port }}
+          env:
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: "zookeeper:{{ .Values.zookeeper.port }}"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+            - name: KAFKA_CFG_LOG_RETENTION_MINUTES
+              value: "60"
+          resources:
+            requests:
+              cpu: {{ .Values.kafka.resources.requests.cpu }}
+              memory: {{ .Values.kafka.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.kafka.resources.limits.cpu }}
+              memory: {{ .Values.kafka.resources.limits.memory }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.kafka.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.kafka.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: {{ .Values.kafka.storage }}

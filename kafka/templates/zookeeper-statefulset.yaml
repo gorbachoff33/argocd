@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+spec:
+  serviceName: zookeeper
+  replicas: {{ .Values.zookeeper.replicas }}
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: {{ .Values.zookeeper.image }}
+          ports:
+            - containerPort: {{ .Values.zookeeper.port }}
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+          resources:
+            requests:
+              cpu: {{ .Values.zookeeper.resources.requests.cpu }}
+              memory: {{ .Values.zookeeper.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.zookeeper.resources.limits.cpu }}
+              memory: {{ .Values.zookeeper.resources.limits.memory }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "echo ruok | nc 127.0.0.1 2181 | grep imok"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "echo ruok | nc 127.0.0.1 2181 | grep imok"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/zookeeper
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: {{ .Values.zookeeper.storage }}
