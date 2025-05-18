@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5432
@@ -24,15 +24,15 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.existingSecret }}
-                  key: {{ .Values.postgresql.usernameKey }}
+                  name: {{ .Values.postgresql.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.postgresql.usernameKey }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.existingSecret }}
-                  key: {{ .Values.postgresql.passwordKey }}
+                  name: {{ .Values.postgresql.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.postgresql.passwordKey }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgresql.database }}
+              value: {{ .Values.postgresql.postgresql.database }}
 
           volumeMounts:
             - name: data
@@ -41,8 +41,8 @@ spec:
     - metadata:
         name: data
       spec:
-        accessModes: [ "{{ .Values.persistence.accessMode }}" ]
+        accessModes: [ "{{ .Values.postgresql.persistence.accessMode }}" ]
         resources:
           requests:
-            storage: {{ .Values.persistence.size }}
-        storageClassName: {{ .Values.persistence.storageClass }}
+            storage: {{ .Values.postgresql.persistence.size }}
+        storageClassName: {{ .Values.postgresql.persistence.storageClass }}

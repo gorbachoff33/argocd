@@ -4,8 +4,8 @@ metadata:
   name: nfs-pvc
 spec:
   accessModes:
-    {{- toYaml .Values.persistence.accessModes | nindent 4 }}
+    {{- toYaml .Values.nfs-server.persistence.accessModes | nindent 4 }}
   resources:
     requests:
-      storage: {{ .Values.persistence.size }}
-  storageClassName: {{ .Values.persistence.storageClass }}
+      storage: {{ .Values.nfs-server.persistence.size }}
+  storageClassName: {{ .Values.nfs-server.persistence.storageClass }}
