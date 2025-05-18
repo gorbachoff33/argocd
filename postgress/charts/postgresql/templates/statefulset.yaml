@@ -15,6 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
+          {{- printf "--- DEBUG: .Values.postgress:\n%s" (toYaml .Values.postgress) | indent 10 }}
           image: "{{ .Values.postgress.image.repository }}:{{ .Values.postgress.image.tag }}"
           imagePullPolicy: {{ .Values.postgress.image.pullPolicy }}
           ports:
