@@ -1,0 +1,13 @@
+apiVersion: v2
+name: umbrella
+description: Full stack CI/CD chart
+version: 0.1.0
+appVersion: 1.0.0
+
+dependencies:
+  - name: postgresql
+    version: 15
+    repository: file://charts/postgresql
+  - name: nfs-server
+    version: 1.0
+    repository: file://charts/nfs-server

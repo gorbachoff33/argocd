@@ -1,0 +1,30 @@
+postgresql:
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+
+  postgresql:
+    existingSecret: postgresql-creds
+    usernameKey: username
+    passwordKey: password
+    databaseKey: database
+
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  persistence:
+    enabled: true
+    storageClass: nfs-postgresql
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+  service:
+    type: ClusterIP
+    port: 5432
