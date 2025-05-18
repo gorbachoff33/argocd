@@ -1,4 +1,4 @@
-{{- if .Values.nfs-server.storageClass.create }}
+{{ if .Values.nfs-server.storageClass.create }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
