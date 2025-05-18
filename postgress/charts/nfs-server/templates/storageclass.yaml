@@ -11,4 +11,4 @@ mountOptions:
 {{ toYaml .Values.nfs-server.nfs.mountOptions | indent 2 }}
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
-{{- end }}
+{{ end }}
