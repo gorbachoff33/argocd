@@ -8,6 +8,6 @@ dependencies:
   - name: postgresql
     version: 15
     repository: file://charts/postgresql
-  - name: nfs-server
+  - name: nfsserver
     version: 1.0
-    repository: file://charts/nfs-server
+    repository: file://charts/nfsserver

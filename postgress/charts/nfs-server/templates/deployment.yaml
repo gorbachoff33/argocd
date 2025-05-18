@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nfs-server
+  name: nfsserver
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nfs-server
+      app: nfsserver
   template:
     metadata:
       labels:
-        app: nfs-server
+        app: nfsserver
     spec:
       containers:
-        - name: nfs-server
+        - name: nfsserver
           image: k8s.gcr.io/volume-nfs:0.8
           ports:
             - containerPort: 2049

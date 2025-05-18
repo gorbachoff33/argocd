@@ -1,4 +1,4 @@
-nfs-server:
+nfsserver:
   persistence:
   enabled: true
   size: 10Gi
