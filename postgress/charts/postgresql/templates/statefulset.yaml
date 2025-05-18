@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
-          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          image: "{{ .Values.postgress.image.repository }}:{{ .Values.postgress.image.tag }}"
+          imagePullPolicy: {{ .Values.postgress.image.pullPolicy }}
           ports:
             - containerPort: 5432
               name: postgres
@@ -24,15 +24,15 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.postgresql.existingSecret }}
-                  key: {{ .Values.postgresql.postgresql.usernameKey }}
+                  name: {{ .Values.postgress.postgresql.existingSecret }}
+                  key: {{ .Values.postgress.postgresql.usernameKey }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.postgresql.existingSecret }}
-                  key: {{ .Values.postgresql.postgresql.passwordKey }}
+                  name: {{ .Values.postgress.postgresql.existingSecret }}
+                  key: {{ .Values.postgress.postgresql.passwordKey }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgresql.postgresql.database }}
+              value: {{ .Values.postgress.postgresql.database }}
 
           volumeMounts:
             - name: data
@@ -41,8 +41,8 @@ spec:
     - metadata:
         name: data
       spec:
-        accessModes: [ "{{ .Values.postgresql.persistence.accessMode }}" ]
+        accessModes: [ "{{ .Values.postgress.persistence.accessMode }}" ]
         resources:
           requests:
-            storage: {{ .Values.postgresql.persistence.size }}
-        storageClassName: {{ .Values.postgresql.persistence.storageClass }}
+            storage: {{ .Values.postgress.persistence.size }}
+        storageClassName: {{ .Values.postgress.persistence.storageClass }}

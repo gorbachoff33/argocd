@@ -1,4 +1,4 @@
-postgresql:
+postgress:
   image:
     repository: postgres
     tag: "15"

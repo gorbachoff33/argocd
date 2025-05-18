@@ -7,7 +7,7 @@ appVersion: 1.0.0
 dependencies:
   - name: postgresql
     version: 15
-    repository: file://charts/postgresql
+    repository: file://charts/postgress
   - name: nfsserver
     version: 1.0
     repository: file://charts/nfsserver
