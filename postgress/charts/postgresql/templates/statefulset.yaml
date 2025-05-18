@@ -16,7 +16,7 @@ spec:
       containers:
         - name: postgres
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
           ports:
             - containerPort: 5432
               name: postgres
