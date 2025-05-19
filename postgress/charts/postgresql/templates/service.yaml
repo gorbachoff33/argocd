@@ -4,8 +4,8 @@ metadata:
   name: postgresql
 spec:
   ports:
-    - port: {{ .Values.postgress.service.port }}
+    - port: {{ .Values.service.port }}
       targetPort: 5432
   selector:
     app: postgresql
-  type: {{ .Values.postgress.service.type }}
+  type: {{ .Values.service.type }}

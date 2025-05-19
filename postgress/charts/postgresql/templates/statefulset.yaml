@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: "{{ .Values.postgress.image.repository }}:{{ .Values.postgress.image.tag }}"
-          imagePullPolicy: {{ .Values.postgress.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5432
               name: postgres
@@ -24,18 +24,18 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgress.postgresql.existingSecret }}
-                  key: {{ .Values.postgress.postgresql.usernameKey }}
+                  name: {{ .Values.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.usernameKey }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgress.postgresql.existingSecret }}
-                  key: {{ .Values.postgress.postgresql.passwordKey }}
+                  name: {{ .Values.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.passwordKey }}
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgress.postgresql.existingSecret }}
-                  key: {{ .Values.postgress.postgresql.databaseKey }}
+                  name: {{ .Values.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.databaseKey }}
 
           volumeMounts:
             - name: data
@@ -44,8 +44,8 @@ spec:
     - metadata:
         name: data
       spec:
-        accessModes: [ "{{ .Values.postgress.persistence.accessMode }}" ]
+        accessModes: [ "{{ .Values.persistence.accessMode }}" ]
         resources:
           requests:
-            storage: {{ .Values.postgress.persistence.size }}
-        storageClassName: {{ .Values.postgress.persistence.storageClass }}
+            storage: {{ .Values.persistence.size }}
+        storageClassName: {{ .Values.persistence.storageClass }}
