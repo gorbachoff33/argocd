@@ -1,10 +1,10 @@
 nfsserver:
   persistence:
-  enabled: true
-  size: 10Gi
-  storageClass: local-path
-  accessModes:
-    - ReadWriteOnce
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+    accessModes:
+      - ReadWriteOnce
 
   nfs:
     path: /exports
