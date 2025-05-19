@@ -1,14 +1,14 @@
-{{ if .Values.nfsserver.storageClass.create }}
+{{ if .Values.storageClass.create }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: {{ .Values.nfsserver.storageClass.name }}
+  name: {{ .Values.storageClass.name }}
 provisioner: example.com/nfs
 allowVolumeExpansion: true
 parameters:
   archiveOnDelete: "false"
 mountOptions:
-{{ toYaml .Values.nfsserver.nfs.mountOptions | indent 2 }}
+{{ toYaml .Values.nfs.mountOptions | indent 2 }}
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 {{ end }}
