@@ -8,7 +8,7 @@ persistence:
 nfs:
   path: /exports
   mountOptions:
-    - vers=4.1
+    - nolock
 
 storageClass:
   create: true
