@@ -1,6 +1,0 @@
-apiVersion: v2
-name: nfsserver
-version: 0.1.0
-description: NFS server with storageClass for PostgreSQL
-type: application
-appVersion: "1.0"
