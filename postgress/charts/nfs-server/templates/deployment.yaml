@@ -12,6 +12,7 @@ spec:
       labels:
         app: nfsserver
     spec:
+      hostNetwork: true
       containers:
         - name: nfsserver
           image: k8s.gcr.io/volume-nfs:0.8
