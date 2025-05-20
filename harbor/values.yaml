@@ -871,11 +871,11 @@ registry:
     resourcesPreset: "small"
     resources:
       requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     containerSecurityContext:
       enabled: true
       seLinuxOptions: {}
@@ -940,11 +940,11 @@ registry:
     resourcesPreset: "small"
     resources:
       requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     containerSecurityContext:
       enabled: true
       seLinuxOptions: {}
@@ -1222,11 +1222,11 @@ postgresql:
     resourcesPreset: "nano"
     resources:
       requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
 externalDatabase:
   host: localhost
   port: 5432
@@ -1262,11 +1262,11 @@ redis:
     resourcesPreset: "nano"
     resources:
       requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
 externalRedis:
   host: localhost
   port: 6379
