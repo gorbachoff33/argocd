@@ -21,6 +21,8 @@ spec:
         - name: squid
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/usr/sbin/squid"]
+          args: ["-N", "-f", "/etc/squid/squid.conf"]
           ports:
             {{- range .Values.ports }}
             - containerPort: {{ . }}
