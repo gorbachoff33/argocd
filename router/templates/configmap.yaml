@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: squid-config
+  namespace: {{ .Release.Namespace }}
+data:
+  squid.conf: |
+    acl all src all
+    http_access allow all
+
+    cache deny all
+    cache_mem 0 MB
+    maximum_object_size 0 KB
+    access_log none
+    cache_log /dev/null
+    cache_store_log none
+    logfile_rotate 0
+
+    via off
+    forwarded_for delete
+
+    {{- range .Values.ports }}
+    http_port {{ . }}
+    {{- end }}

@@ -1,0 +1,30 @@
+replicaCount: 2
+
+image:
+  repository: ubuntu/squid
+  tag: 5.2-22.04_beta
+  pullPolicy: IfNotPresent
+
+ports:
+  - 3128
+  - 3129
+  - 3130
+  - 3131
+  - 3132
+  - 3133
+  - 3134
+  - 3135
+  - 3136
+  - 3137
+
+hostNetwork: true
+
+nodeAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+      - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k8s-master
+              - k8s-node1
