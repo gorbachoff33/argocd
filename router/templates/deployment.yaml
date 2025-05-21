@@ -18,6 +18,11 @@ spec:
         - name: squid
           image: ubuntu/squid:5.2-22.04_beta
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: squid-config
+            mountPath: /etc/squid/squid.config
+            subPath: squid.config
+            readOnly: true
           ports:
             {{- range .Values.ports }}
             - containerPort: {{ . }}
@@ -26,6 +31,12 @@ spec:
           securityContext:
             runAsUser: 0
             privileged: true
+      
+      volumes:
+        - name: squid-config
+          configMap:
+            name: squid-config
+
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
