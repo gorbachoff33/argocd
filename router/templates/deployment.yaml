@@ -21,8 +21,14 @@ spec:
         - name: squid
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/usr/sbin/squid"]
-          args: ["-N", "-f", "/etc/squid/squid.conf"]
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - |
+              mkdir -p /var/spool/squid
+              chown -R proxy:proxy /var/spool/squid
+              squid -z -f /etc/squid/squid.conf
+              squid -N -f /etc/squid/squid.conf
           ports:
             {{- range .Values.ports }}
             - containerPort: {{ . }}
