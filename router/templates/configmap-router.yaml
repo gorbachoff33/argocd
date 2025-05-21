@@ -58,11 +58,11 @@ data:
 
         def select_port(self, parser_id):
             base_index = abs(hash(parser_id)) % len(SQUID_PORTS)
-            print(f"[{parser_id}] trying port {port}, last_used = {last_used.get((parser_id, port), 0):.2f}, now = {now:.2f}")
             while True:
                 now = time.time()
                 for i in range(len(SQUID_PORTS)):
                     port = SQUID_PORTS[(base_index + i) % len(SQUID_PORTS)]
+                    print(f"[{parser_id}] trying port {port}, last_used = {last_used.get((parser_id, port), 0):.2f}, now = {now:.2f}")
                     if self.port_available(parser_id, port, now):
                         self.mark_port_used(parser_id, port, now)
                         return port
