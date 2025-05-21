@@ -23,6 +23,12 @@ spec:
             mountPath: /etc/squid/squid.config
             subPath: squid.config
             readOnly: true
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - |
+              squid -z -f /etc/squid/squid.conf
+              squid -N -f /etc/squid/squid.conf
           ports:
             {{- range .Values.ports }}
             - containerPort: {{ . }}
