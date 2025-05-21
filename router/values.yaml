@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: ubuntu/squid
@@ -37,4 +37,3 @@ nodeAffinity:
             operator: In
             values:
               - k8s-master
-              - k8s-node1
