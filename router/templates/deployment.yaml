@@ -2,10 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: squid-proxy
-  labels:
-    app: squid-proxy
+  namespace: parsers
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 2
   selector:
     matchLabels:
       app: squid-proxy
@@ -14,30 +13,29 @@ spec:
       labels:
         app: squid-proxy
     spec:
-      hostNetwork: {{ .Values.hostNetwork }}
-      affinity:
-        nodeAffinity: {{ toYaml .Values.nodeAffinity | nindent 10 }}
+      hostNetwork: true
       containers:
         - name: squid
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/bash"]
-          args:
-            - -c
-            - |
-              mkdir -p /var/spool/squid
-              chown -R proxy:proxy /var/spool/squid
-              squid -z -f /etc/squid/squid.conf
-              squid -N -f /etc/squid/squid.conf
+          image: ubuntu/squid:5.2-22.04_beta
+          imagePullPolicy: IfNotPresent
           ports:
-            {{- range .Values.ports }}
-            - containerPort: {{ . }}
+            {{- range $i := until 30 }}
+            - containerPort: {{ add 3128 $i }}
+              name: squid-{{ add 3128 $i }}
             {{- end }}
-          volumeMounts:
-            - name: squid-config
-              mountPath: /etc/squid/squid.conf
-              subPath: squid.conf
-      volumes:
-        - name: squid-config
-          configMap:
-            name: squid-config
+
+          securityContext:
+            runAsUser: 0
+            privileged: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - squid-proxy
+                topologyKey: "kubernetes.io/hostname"
