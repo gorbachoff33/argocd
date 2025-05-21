@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy-router-script
+  namespace: {{ .Release.Namespace }}
+data:
+  proxy-router.py: |
+    import socketserver
+    import http.server
+    import socket
+    import time
+    import threading
+
+    SQUID_PORTS = list(range(3128, 3148))  # 20 портов
+    DELAY_SECONDS = 2
+    LOCK = threading.Lock()
+    last_used = {}
+
+    class ProxyHandler(http.server.BaseHTTPRequestHandler):
+        def do_CONNECT(self):
+            parser_id = self.headers.get("X-Parser-ID", "default")
+            squid_port = self.select_port(parser_id)
+
+            if not self.wait_allowed(parser_id, squid_port):
+                self.send_error(429, "Too many requests")
+                return
+
+            try:
+                upstream = socket.create_connection(("127.0.0.1", squid_port))
+                self.send_response(200, "Connection Established")
+                self.end_headers()
+                self.forward(self.connection, upstream)
+            except Exception as e:
+                self.send_error(502, f"Bad Gateway: {e}")
+
+        def select_port(self, parser_id):
+            index = abs(hash(parser_id)) % len(SQUID_PORTS)
+            return SQUID_PORTS[index]
+
+        def wait_allowed(self, parser_id, port):
+            now = time.time()
+            key = (parser_id, port)
+            with LOCK:
+                last = last_used.get(key, 0)
+                if now - last >= DELAY_SECONDS:
+                    last_used[key] = now
+                    return True
+                return False
+
+        def forward(self, client_sock, server_sock):
+            def pipe(src, dst):
+                try:
+                    while True:
+                        data = src.recv(4096)
+                        if not data:
+                            break
+                        dst.sendall(data)
+                finally:
+                    src.close()
+                    dst.close()
+
+            threading.Thread(target=pipe, args=(client_sock, server_sock)).start()
+            pipe(server_sock, client_sock)
+
+        def log_message(self, format, *args):
+            return
+
+    if __name__ == "__main__":
+        server = socketserver.ThreadingTCPServer(("0.0.0.0", 8080), ProxyHandler)
+        print("Proxy-router started on port 8080")
+        server.serve_forever()

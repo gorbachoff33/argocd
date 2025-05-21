@@ -34,8 +34,21 @@ spec:
           securityContext:
             runAsUser: 0
             privileged: true
-      
+        - name: proxy-router
+          image: "{{ .Values.proxyRouter.image.repository }}:{{ .Values.proxyRouter.image.tag }}"
+          imagePullPolicy: {{ .Values.proxyRouter.image.pullPolicy }}
+          command: ["python"]
+          args: ["/app/proxy-router.py"]
+          volumeMounts:
+            - name: proxy-router-script
+              mountPath: /app/proxy-router.py
+              subPath: proxy-router.py
+
       volumes:
         - name: squid-config
           configMap:
             name: squid-config
+        - name: proxy-router-script
+          configMap:
+            name: proxy-router-script
+

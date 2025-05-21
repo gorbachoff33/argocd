@@ -37,3 +37,10 @@ nodeAffinity:
             operator: In
             values:
               - k8s-master
+proxyRouter:
+  enabled: true
+  port: 8080
+  image:
+    repository: python
+    tag: "3.11-slim"
+    pullPolicy: IfNotPresent
