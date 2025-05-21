@@ -32,10 +32,6 @@ data:
             parser_id = self.headers.get("X-Parser-ID", "default")
             squid_port = self.select_port(parser_id)
 
-            if not self.wait_allowed(parser_id, squid_port):
-                self.send_error(429, "Too many requests")
-                return
-
             try:
                 target = self.path
                 parsed = urllib.parse.urlsplit(target)
@@ -61,18 +57,25 @@ data:
                 self.send_error(502, f"Proxy error: {e}")
 
         def select_port(self, parser_id):
-            index = abs(hash(parser_id)) % len(SQUID_PORTS)
-            return SQUID_PORTS[index]
+            base_index = abs(hash(parser_id)) % len(SQUID_PORTS)
 
-        def wait_allowed(self, parser_id, port):
-            now = time.time()
+            while True:
+                now = time.time()
+                for i in range(len(SQUID_PORTS)):
+                    port = SQUID_PORTS[(base_index + i) % len(SQUID_PORTS)]
+                    if self.port_available(parser_id, port, now):
+                        self.mark_port_used(parser_id, port, now)
+                        return port
+
+        def port_available(self, parser_id, port, now):
             key = (parser_id, port)
             with LOCK:
                 last = last_used.get(key, 0)
-                if now - last >= DELAY_SECONDS:
-                    last_used[key] = now
-                    return True
-                return False
+                return now - last >= DELAY_SECONDS
+
+        def mark_port_used(self, parser_id, port, now):
+            with LOCK:
+                last_used[(parser_id, port)] = now
 
         def forward(self, client_sock, server_sock):
             def pipe(src, dst):
@@ -95,5 +98,5 @@ data:
 
     if __name__ == "__main__":
         server = socketserver.ThreadingTCPServer(("0.0.0.0", 8080), ProxyHandler)
-        print("Proxy-router (HTTP mode) started on port 8080")
+        print("Proxy-router (HTTP, wait mode) started on port 8080")
         server.serve_forever()
