@@ -8,6 +8,7 @@ data:
     import socketserver
     import http.server
     import socket
+    import urllib.parse
     import time
     import threading
 
@@ -18,6 +19,16 @@ data:
 
     class ProxyHandler(http.server.BaseHTTPRequestHandler):
         def do_CONNECT(self):
+            self.send_error(405, "CONNECT not supported in this proxy")
+            return
+
+        def do_GET(self):
+            self.handle_http_proxy()
+
+        def do_POST(self):
+            self.handle_http_proxy()
+
+        def handle_http_proxy(self):
             parser_id = self.headers.get("X-Parser-ID", "default")
             squid_port = self.select_port(parser_id)
 
@@ -26,12 +37,28 @@ data:
                 return
 
             try:
-                upstream = socket.create_connection(("127.0.0.1", squid_port))
-                self.send_response(200, "Connection Established")
-                self.end_headers()
-                self.forward(self.connection, upstream)
+                target = self.path
+                parsed = urllib.parse.urlsplit(target)
+                host = parsed.hostname
+                port = parsed.port or 80
+
+                with socket.create_connection(("127.0.0.1", squid_port)) as proxy_sock:
+                    request_line = f"{self.command} {target} {self.request_version}\r\n"
+                    proxy_sock.sendall(request_line.encode())
+
+                    for header, value in self.headers.items():
+                        proxy_sock.sendall(f"{header}: {value}\r\n".encode())
+                    proxy_sock.sendall(b"\r\n")
+
+                    if "Content-Length" in self.headers:
+                        content_length = int(self.headers["Content-Length"])
+                        body = self.rfile.read(content_length)
+                        proxy_sock.sendall(body)
+
+                    self.forward(self.connection, proxy_sock)
+
             except Exception as e:
-                self.send_error(502, f"Bad Gateway: {e}")
+                self.send_error(502, f"Proxy error: {e}")
 
         def select_port(self, parser_id):
             index = abs(hash(parser_id)) % len(SQUID_PORTS)
@@ -56,7 +83,8 @@ data:
                             break
                         dst.sendall(data)
                 finally:
-                    src.close()
+                    try: dst.shutdown(socket.SHUT_RDWR)
+                    except: pass
                     dst.close()
 
             threading.Thread(target=pipe, args=(client_sock, server_sock)).start()
@@ -67,5 +95,5 @@ data:
 
     if __name__ == "__main__":
         server = socketserver.ThreadingTCPServer(("0.0.0.0", 8080), ProxyHandler)
-        print("Proxy-router started on port 8080")
+        print("Proxy-router (HTTP mode) started on port 8080")
         server.serve_forever()
