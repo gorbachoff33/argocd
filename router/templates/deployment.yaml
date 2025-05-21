@@ -4,7 +4,7 @@ metadata:
   name: squid-proxy
   namespace: parsers
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: squid-proxy
