@@ -20,8 +20,8 @@ spec:
           imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: squid-config
-            mountPath: /etc/squid/squid.config
-            subPath: squid.config
+            mountPath: /etc/squid
+            subPath: squid.conf
             readOnly: true
           command: ["/bin/bash"]
           args:
