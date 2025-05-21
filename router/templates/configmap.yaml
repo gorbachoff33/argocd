@@ -19,6 +19,68 @@ data:
     via off
     forwarded_for delete
 
+    # Открываем все порты, указанные в values.yaml
     {{- range .Values.ports }}
     http_port {{ . }}
     {{- end }}
+
+    # Привязка портов к IP
+    acl port_3128 myport 3128
+    tcp_outgoing_address 88.151.114.78 port_3128
+
+    acl port_3129 myport 3129
+    tcp_outgoing_address 88.151.114.79 port_3129
+
+    acl port_3130 myport 3130
+    tcp_outgoing_address 88.151.114.80 port_3130
+
+    acl port_3131 myport 3131
+    tcp_outgoing_address 88.151.114.81 port_3131
+
+    acl port_3132 myport 3132
+    tcp_outgoing_address 88.151.114.82 port_3132
+
+    acl port_3133 myport 3133
+    tcp_outgoing_address 88.151.114.83 port_3133
+
+    acl port_3134 myport 3134
+    tcp_outgoing_address 88.151.114.84 port_3134
+
+    acl port_3135 myport 3135
+    tcp_outgoing_address 88.151.114.85 port_3135
+
+    acl port_3136 myport 3136
+    tcp_outgoing_address 88.151.114.86 port_3136
+
+    acl port_3137 myport 3137
+    tcp_outgoing_address 88.151.114.87 port_3137
+
+    acl port_3138 myport 3138
+    tcp_outgoing_address 88.151.114.88 port_3138
+
+    acl port_3139 myport 3139
+    tcp_outgoing_address 88.151.114.89 port_3139
+
+    acl port_3140 myport 3140
+    tcp_outgoing_address 88.151.114.90 port_3140
+
+    acl port_3141 myport 3141
+    tcp_outgoing_address 88.151.114.91 port_3141
+
+    acl port_3142 myport 3142
+    tcp_outgoing_address 88.151.114.92 port_3142
+
+    acl port_3143 myport 3143
+    tcp_outgoing_address 88.151.114.93 port_3143
+
+    acl port_3144 myport 3144
+    tcp_outgoing_address 88.151.114.94 port_3144
+
+    acl port_3145 myport 3145
+    tcp_outgoing_address 88.151.114.95 port_3145
+
+    acl port_3146 myport 3146
+    tcp_outgoing_address 88.151.114.96 port_3146
+
+    acl port_3147 myport 3147
+    tcp_outgoing_address 88.151.114.98 port_3147
