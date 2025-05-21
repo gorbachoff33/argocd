@@ -19,11 +19,10 @@ spec:
           image: ubuntu/squid:5.2-22.04_beta
           imagePullPolicy: IfNotPresent
           ports:
-            {{- range $i := until 30 }}
-            - containerPort: {{ add 3128 $i }}
-              name: squid-{{ add 3128 $i }}
+            {{- range .Values.ports }}
+            - containerPort: {{ . }}
+              name: squid-{{ . }}
             {{- end }}
-
           securityContext:
             runAsUser: 0
             privileged: true
