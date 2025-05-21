@@ -13,7 +13,7 @@ data:
     import threading
 
     SQUID_PORTS = list(range(3128, 3148))  # 20 портов
-    DELAY_SECONDS = 2
+    DELAY_SECONDS = 1.8
     LOCK = threading.Lock()
     last_used = {}
 
