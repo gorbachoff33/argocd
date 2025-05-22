@@ -1,5 +1,5 @@
 apiVersion: v2
-name: umbrella
+name: main
 description: Full stack CI/CD chart
 version: 0.1.0
 appVersion: 1.0.0
@@ -11,3 +11,6 @@ dependencies:
   - name: mmparser
     version: 1.0.0
     repository: file://charts/mmparser
+  - name: telegram-message
+    version: 1.0.0
+    repository: file://charts/telegram-message
