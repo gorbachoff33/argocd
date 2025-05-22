@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telegram-message-config
+data:
+  config.json: |
+    spring.kafka.bootstrap-servers=kafka.kafka.svc.cluster.local:9092
+    spring.kafka.consumer.group-id=java_konsumer
+    spring.kafka.consumer.properties.max.poll.interval.ms=900000
+    spring.kafka.consumer.max-poll-records=100
+    spring.kafka.consumer.auto-offset-reset=earliest
+    spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+    spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+    spring.kafka.consumer.enable-auto-commit=true
+    spring.kafka.listener.ack-mode=record
+    spring.kafka.properties.reconnect.backoff.ms=1000
+    spring.kafka.properties.reconnect.backoff.max.ms=10000
+    spring.kafka.properties.retry.backoff.ms=1000
+    spring.kafka.properties.request.timeout.ms=30000
+    spring.kafka.properties.connections.max.idle.ms=300000
+    spring.kafka.listener.poll-timeout=5000
+
+    telegram.bot.token=7588179157:AAEcqSGe8rdx2b9yitZ2ZUhGU6OiNWf5Asc
+    telegram.bot.chat=-1002347815748
