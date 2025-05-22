@@ -98,6 +98,6 @@ data:
             return
 
     if __name__ == "__main__":
-        server = socketserver.ThreadingTCPServer(("0.0.0.0", 8081), ProxyHandler)
-        print("Proxy-router (HTTP, wait mode) started on port 8081")
+        server = socketserver.ThreadingTCPServer(("0.0.0.0", 8080), ProxyHandler)
+        print("Proxy-router (HTTP, wait mode) started on port 8080")
         server.serve_forever()
