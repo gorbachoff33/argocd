@@ -14,4 +14,5 @@ resources:
     cpu: "500m"
     memory: "512Mi"
 
+nodeSelector: k8s-master
 replicaCount: 1
