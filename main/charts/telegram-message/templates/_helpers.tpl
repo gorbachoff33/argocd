@@ -1,7 +1,7 @@
-{{- define "telegramm-message.name" -}}
-telegramm-message
+{{- define "telegram-message.name" -}}
+telegram-message
 {{- end }}
 
-{{- define "telegramm-message.fullname" -}}
-{{ .Release.Name }}-telegramm-message
+{{- define "telegram-message.fullname" -}}
+{{ .Release.Name }}-telegram-message
 {{- end }}
