@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tg-message.fullname" . }}
+  name: {{ include "telegram-message.fullname" . }}
   labels:
-    app: {{ include "tg-message.name" . }}
+    app: {{ include "telegram-message.name" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "tg-message.name" . }}
+      app: {{ include "telegram-message.name" . }}
   template:
     metadata:
       labels:
-        app: {{ include "tg-message.name" . }}
+        app: {{ include "telegram-message.name" . }}
     spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
@@ -25,10 +25,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: tg-message-config
+            - name: telegram-message-config
               mountPath: /app/config/applocation.properties
               subPath: applocation.properties
       volumes:
-        - name: tg-message-config
+        - name: telegram-message-config
           configMap:
-            name: tg-message-config
+            name: telegram-message-config
