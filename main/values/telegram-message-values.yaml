@@ -1,17 +1,18 @@
-image:
-  repository: 8761.online-vds.ru:32001/telegram-message/telegram-message
-  tag: "1.0.1"
-  pullPolicy: Always
+telegram-message:
+  image:
+    repository: 8761.online-vds.ru:32001/telegram-message/telegram-message
+    tag: "1.0.1"
+    pullPolicy: Always
 
-imagePullSecrets:
-  - name: harbor-creds
+  imagePullSecrets:
+    - name: harbor-creds
 
-resources:
-  requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
 
-replicaCount: 1
+  replicaCount: 1

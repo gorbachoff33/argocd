@@ -1,18 +1,19 @@
-image:
-  repository: 8761.online-vds.ru:32001/mmparser/mmparser
-  tag: "1.0.2"
-  pullPolicy: Always
+mmparser:
+  image:
+    repository: 8761.online-vds.ru:32001/mmparser/mmparser
+    tag: "1.0.2"
+    pullPolicy: Always
 
-imagePullSecrets:
-  - name: harbor-creds
+  imagePullSecrets:
+    - name: harbor-creds
 
-resources:
-  requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
 
-nodeSelector: k8s-master
-replicaCount: 1
+  nodeSelector: k8s-master
+  replicaCount: 1
