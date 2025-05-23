@@ -27,7 +27,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: telegram-message-config
-              mountPath: /app/config/application.properties
+              mountPath: /home/config/application.properties
               subPath: application.properties
           env:
           - name: JAVA_OPTS
