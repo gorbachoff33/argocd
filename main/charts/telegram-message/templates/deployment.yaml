@@ -18,7 +18,7 @@ spec:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       env:
       - name: SPRING_CONFIG_LOCATION
-        value: /app/config/
+        value: file:/app/config/
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
