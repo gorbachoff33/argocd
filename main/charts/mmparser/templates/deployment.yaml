@@ -15,6 +15,7 @@ spec:
         app: {{ include "mmparser.name" . }}
     spec:
       hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.nodeSelector }}
       imagePullSecrets:
