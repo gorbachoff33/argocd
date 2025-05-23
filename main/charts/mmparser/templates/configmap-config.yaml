@@ -77,7 +77,7 @@ data:
       ],
       "price_min_value_alert": 1000,
       "bonus_percent_alert": 30,
-      "alert_repeat_timeout": 72,
+      "alert_repeat_timeout": 336,
       "threads": 20,
       "delay": 1.8,
       "error_delay": 5,
