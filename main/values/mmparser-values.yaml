@@ -1,7 +1,7 @@
 mmparser:
   image:
     repository: 8761.online-vds.ru:32001/mmparser/mmparser
-    tag: "1.0.2"
+    tag: "1.0.3"
     pullPolicy: Always
 
   imagePullSecrets:
