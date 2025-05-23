@@ -17,3 +17,4 @@ mmparser:
 
   nodeSelector: k8s-master
   replicaCount: 1
+  hostNetwork: true
