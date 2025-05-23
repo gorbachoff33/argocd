@@ -17,8 +17,6 @@ spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       env:
-      - name: SPRING_CONFIG_LOCATION
-        value: file:/app/config/
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -31,6 +29,12 @@ spec:
             - name: telegram-message-config
               mountPath: /app/config/application.properties
               subPath: application.properties
+          env:
+          - name: JAVA_OPTS
+            valueFrom:
+              configMapKeyRef:
+                name: telegram-message-config
+                key: JAVA_OPTS
       volumes:
         - name: telegram-message-config
           configMap:
