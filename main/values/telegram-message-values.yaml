@@ -16,3 +16,4 @@ telegram-message:
       memory: "512Mi"
 
   replicaCount: 1
+  nodeSelector: k8s-node1
